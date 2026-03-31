@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { formatDuration } from "../lib/formatDuration.js";
 
 export function ChatComposer({
@@ -11,6 +12,22 @@ export function ChatComposer({
   text,
 }) {
   const canSubmit = Boolean(text.trim() || imageFile || recorder.audioBlob);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (imageFile) {
+      const url = URL.createObjectURL(imageFile);
+      setImagePreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setImagePreviewUrl(null);
+    }
+  }, [imageFile]);
+
+  const handleRemoveImage = () => {
+    onImageChange({ target: { files: [] } });
+    setImagePreviewUrl(null);
+  };
 
   return (
     <div className="shrink-0 border-t border-chat-border bg-chat-bg">
@@ -30,6 +47,24 @@ export function ChatComposer({
               rows={1}
               value={text}
             />
+
+            {imagePreviewUrl && (
+              <div className="relative inline-block max-w-fit">
+                <img
+                  src={imagePreviewUrl}
+                  alt="Preview"
+                  className="max-h-[120px] rounded-lg border border-white/10"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-chat-bg text-[11px] text-white transition hover:bg-red-500/20 hover:text-red-300"
+                  aria-label="Remove image"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -100,6 +135,12 @@ export function ChatComposer({
               Your browser does not support audio playback.
             </audio>
           ) : null}
+
+          {recorder.error && (
+            <p className="px-1 text-center text-[12px] text-red-300/90">
+              {recorder.error}
+            </p>
+          )}
 
           <p className="px-1 text-center text-[11px] text-chat-muted">
             Draft only — verify clinical content and codes before use.

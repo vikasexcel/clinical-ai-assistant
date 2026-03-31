@@ -1,34 +1,56 @@
 import { z } from "zod";
 
-export const riskLevelSchema = z.enum(["LOW", "MEDIUM", "HIGH"]);
-
-const codingSuggestionSchema = z.object({
-  code: z.string().min(1),
-  label: z.string().min(1),
-  rationale: z.string().min(1),
-});
+export const confidenceLevelSchema = z.enum(["High", "Medium", "Low"]);
+export const riskLevelSchema = z.enum(["Low", "Medium", "High"]);
 
 export const clinicalAssistantInsightsSchema = z.object({
-  clinicalNote: z.object({
-    summary: z.string().min(1),
-    subjective: z.string().min(1),
-    objective: z.string().min(1),
+  billingDecision: z.object({
+    recommendedCpt: z.object({
+      code: z.string().min(1),
+      label: z.string().min(1),
+    }),
+    confidence: confidenceLevelSchema,
+    riskLevel: riskLevelSchema,
+    downcodingRisk: z.number().min(0).max(100),
+    denialRisk: z.number().min(0).max(100),
+  }),
+  mainIssue: z
+    .object({
+      issue: z.string().min(1),
+      whyItMatters: z.string().min(1),
+    })
+    .nullable(),
+  actionableFixes: z.object({
+    header: z.string().min(1),
+    fixes: z
+      .array(
+        z.object({
+          action: z.string().min(1),
+          example: z.string().nullable(),
+        }),
+      )
+      .min(2)
+      .max(4),
+  }),
+  structuredNote: z.object({
+    chiefComplaint: z.string().min(1),
+    hpi: z.string().min(1),
     assessment: z.string().min(1),
     plan: z.string().min(1),
-    missingInformation: z.array(z.string()).max(8),
   }),
-  codingSuggestions: z.object({
-    cpt: z.array(codingSuggestionSchema).max(5),
-    icd10: z.array(codingSuggestionSchema).max(5),
-  }),
-  riskAnalysis: z.object({
-    level: riskLevelSchema,
-    summary: z.string().min(1),
-    supportingFactors: z.array(z.string()).max(6),
-    watchItems: z.array(z.string()).max(6),
-  }),
-  improvementSuggestions: z.array(z.string()).max(8),
-  disclaimer: z.string().min(1),
+  smartWarning: z
+    .object({
+      message: z.string().min(1),
+    })
+    .nullable(),
+  icd10Suggestions: z
+    .array(
+      z.object({
+        code: z.string().min(1),
+        label: z.string().min(1),
+      }),
+    )
+    .max(3),
 });
 
 export const clinicalAnalysisResponseSchema = z.object({
@@ -40,9 +62,10 @@ export const clinicalAnalysisResponseSchema = z.object({
     normalizedDraft: z.string().min(1),
     warnings: z.array(z.string()),
   }),
-  clinicalNote: clinicalAssistantInsightsSchema.shape.clinicalNote,
-  codingSuggestions: clinicalAssistantInsightsSchema.shape.codingSuggestions,
-  riskAnalysis: clinicalAssistantInsightsSchema.shape.riskAnalysis,
-  improvementSuggestions: clinicalAssistantInsightsSchema.shape.improvementSuggestions,
-  disclaimer: clinicalAssistantInsightsSchema.shape.disclaimer,
+  billingDecision: clinicalAssistantInsightsSchema.shape.billingDecision,
+  mainIssue: clinicalAssistantInsightsSchema.shape.mainIssue,
+  actionableFixes: clinicalAssistantInsightsSchema.shape.actionableFixes,
+  structuredNote: clinicalAssistantInsightsSchema.shape.structuredNote,
+  smartWarning: clinicalAssistantInsightsSchema.shape.smartWarning,
+  icd10Suggestions: clinicalAssistantInsightsSchema.shape.icd10Suggestions,
 });

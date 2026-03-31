@@ -106,8 +106,20 @@ export function useAudioRecorder() {
       }, 250);
 
       mediaRecorder.start();
-    } catch {
-      setError("Microphone access was not granted.");
+    } catch (err) {
+      const isHttps = window.location.protocol === "https:";
+      const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+      
+      if (!isHttps && !isLocalhost) {
+        setError("Voice recording requires HTTPS. Please use HTTPS or localhost to enable microphone access.");
+      } else if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setError("Microphone access denied. Please allow microphone permissions in your browser settings.");
+      } else if (err.name === "NotFoundError") {
+        setError("No microphone found. Please connect a microphone and try again.");
+      } else {
+        setError("Microphone access failed. Please check permissions and try again.");
+      }
+      
       setIsRecording(false);
       clearTimer();
       stopTracks();
