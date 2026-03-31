@@ -32,10 +32,17 @@ function StructuredResultComponent({ result }) {
   return (
     <article className="text-[15px] leading-relaxed" aria-labelledby="response-title">
       {inputSummary?.warnings?.length > 0 && (
-        <div className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-          <ul className="m-0 list-disc space-y-1 pl-5 text-[14px] text-amber-100/90">
-            {inputSummary.warnings.map((warning) => (
-              <li key={warning}>{warning}</li>
+        <div className="mb-6 rounded-lg border border-amber-400/40 bg-amber-950/30 p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <span className="text-[14px] text-amber-400">⚠</span>
+            <p className="text-[12px] font-medium uppercase tracking-wider text-amber-400/90">Input Warnings</p>
+          </div>
+          <ul className="m-0 space-y-1.5 pl-0">
+            {inputSummary.warnings.map((warning, index) => (
+              <li key={warning} className="flex items-start gap-2 text-[14px] leading-relaxed text-amber-100/80">
+                <span className="mt-1 text-amber-400/60">•</span>
+                <span>{warning}</span>
+              </li>
             ))}
           </ul>
         </div>
@@ -43,44 +50,42 @@ function StructuredResultComponent({ result }) {
 
       <div className="divide-y divide-white/[0.08]">
         <Section title="1. Billing Decision">
-          <div className="rounded-lg border border-white/10 bg-white/[0.03] p-5">
-            <div className="space-y-4">
+          <div className="space-y-4 rounded-lg border border-white/10 bg-white/[0.02] p-5">
+            <div className="border-l-4 border-sky-500 bg-sky-950/20 pl-4 pr-4 py-3">
+              <p className="mb-1 text-[11px] font-medium uppercase tracking-wider text-sky-400/80">Recommended CPT</p>
+              <p className="text-[22px] font-bold tracking-tight text-white">
+                {billingDecision.recommendedCpt.code}
+              </p>
+              <p className="mt-0.5 text-[14px] text-white/70">{billingDecision.recommendedCpt.label}</p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Confidence</p>
+                <span
+                  className={`inline-block rounded px-3 py-1.5 text-[13px] font-semibold ${confidenceColors[billingDecision.confidence]}`}
+                >
+                  {billingDecision.confidence}
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-white/50">Risk Level</p>
+                <span
+                  className={`inline-block rounded px-3 py-1.5 text-[13px] font-semibold ${riskLevelColors[billingDecision.riskLevel]}`}
+                >
+                  {billingDecision.riskLevel}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid gap-3 border-t border-white/5 pt-4 sm:grid-cols-2">
               <div>
-                <p className="mb-1 text-[12px] font-medium text-chat-muted">Recommended CPT</p>
-                <p className="text-[20px] font-semibold text-white">
-                  {billingDecision.recommendedCpt.code}
-                </p>
-                <p className="text-[14px] text-white/70">{billingDecision.recommendedCpt.label}</p>
+                <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-amber-400/70">Downcoding Risk</p>
+                <p className="text-[28px] font-bold leading-none text-amber-300/90">{billingDecision.downcodingRisk}%</p>
               </div>
-
-              <div className="flex items-center gap-3">
-                <div>
-                  <p className="mb-1 text-[12px] font-medium text-chat-muted">Confidence</p>
-                  <span
-                    className={`inline-block rounded-md border px-3 py-1 text-[13px] font-medium ${confidenceColors[billingDecision.confidence]}`}
-                  >
-                    {billingDecision.confidence}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div>
-                  <p className="mb-1 text-[12px] font-medium text-chat-muted">Risk Level</p>
-                  <span
-                    className={`inline-block rounded-md border px-3 py-1 text-[13px] font-medium ${riskLevelColors[billingDecision.riskLevel]}`}
-                  >
-                    {billingDecision.riskLevel}
-                  </span>
-                </div>
-                <div>
-                  <p className="mb-1 text-[12px] font-medium text-chat-muted">Downcoding Risk</p>
-                  <p className="text-[18px] font-semibold text-white">{billingDecision.downcodingRisk}%</p>
-                </div>
-                <div>
-                  <p className="mb-1 text-[12px] font-medium text-chat-muted">Denial Risk</p>
-                  <p className="text-[18px] font-semibold text-white">{billingDecision.denialRisk}%</p>
-                </div>
+              <div>
+                <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wider text-red-400/70">Denial Risk</p>
+                <p className="text-[28px] font-bold leading-none text-red-300/90">{billingDecision.denialRisk}%</p>
               </div>
             </div>
           </div>
@@ -88,40 +93,48 @@ function StructuredResultComponent({ result }) {
 
         {smartWarning && (
           <Section title="⚠️ High Risk Warning">
-            <div className="rounded-lg border border-red-500/40 bg-red-500/15 px-4 py-3">
-              <p className="text-[15px] font-medium leading-relaxed text-red-200">{smartWarning.message}</p>
+            <div className="rounded-lg border border-red-500/50 bg-red-950/30 p-4">
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 text-[18px] text-red-400">⚠</span>
+                <div className="flex-1">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-red-400/80">Critical Alert</p>
+                  <p className="text-[15px] font-medium leading-relaxed text-red-100/90">{smartWarning.message}</p>
+                </div>
+              </div>
             </div>
           </Section>
         )}
 
         {mainIssue && (
           <Section title="2. Main Issue">
-            <div className="space-y-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
-              <div>
-                <p className="text-[14px] font-semibold text-amber-100">Main Issue:</p>
-                <p className="mt-1 text-[15px] leading-relaxed text-white/90">{mainIssue.issue}</p>
+            <div className="space-y-3 rounded-lg border border-amber-500/40 bg-amber-950/20 p-4">
+              <div className="border-l-2 border-amber-500 pl-3">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-amber-400/80">Issue</p>
+                <p className="mt-1 text-[15px] font-medium leading-relaxed text-amber-100/90">{mainIssue.issue}</p>
               </div>
-              <div>
-                <p className="text-[14px] font-semibold text-amber-100">Why it matters:</p>
-                <p className="mt-1 text-[15px] leading-relaxed text-white/90">{mainIssue.whyItMatters}</p>
+              <div className="border-l-2 border-amber-500/40 pl-3">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-amber-400/60">Why it matters</p>
+                <p className="mt-1 text-[14px] leading-relaxed text-white/80">{mainIssue.whyItMatters}</p>
               </div>
             </div>
           </Section>
         )}
 
         <Section title="3. Actionable Fixes">
-          <div className="space-y-3">
-            <p className="text-[15px] font-semibold text-white">{actionableFixes.header}</p>
+          <div className="space-y-4 rounded-lg border border-emerald-600/30 bg-emerald-950/20 p-4">
+            <p className="text-[13px] font-semibold text-emerald-300/90">{actionableFixes.header}</p>
             <ul className="m-0 space-y-3 pl-0">
               {actionableFixes.fixes.map((fix, index) => (
-                <li key={index} className="flex gap-3">
-                  <span className="mt-1.5 flex h-1.5 w-1.5 shrink-0 rounded-full bg-white/60" />
+                <li key={index} className="flex gap-3 border-l-2 border-emerald-600/40 pl-3">
+                  <span className="mt-1 text-[11px] font-bold text-emerald-500/60">
+                    {index + 1}.
+                  </span>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[15px] leading-relaxed text-white/90">{fix.action}</p>
+                    <p className="text-[14px] leading-relaxed text-white/90">{fix.action}</p>
                     {fix.example && (
-                      <p className="mt-1 text-[14px] italic leading-relaxed text-white/60">
-                        Example: "{fix.example}"
-                      </p>
+                      <div className="mt-2 rounded bg-emerald-950/40 px-3 py-2 text-[13px] italic text-emerald-100/60">
+                        "{fix.example}"
+                      </div>
                     )}
                   </div>
                 </li>
@@ -131,40 +144,46 @@ function StructuredResultComponent({ result }) {
         </Section>
 
         <Section title="4. Structured Note">
-          <div className="space-y-4">
+          <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
             <div>
-              <p className="mb-1 text-[13px] font-semibold text-chat-muted">Chief Complaint:</p>
-              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-400/80">Chief Complaint</p>
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/95">
                 {structuredNote.chiefComplaint}
               </p>
             </div>
-            <div>
-              <p className="mb-1 text-[13px] font-semibold text-chat-muted">HPI:</p>
-              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">{structuredNote.hpi}</p>
+            <div className="border-t border-white/5 pt-3">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">HPI</p>
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">{structuredNote.hpi}</p>
             </div>
-            <div>
-              <p className="mb-1 text-[13px] font-semibold text-chat-muted">Assessment:</p>
-              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">
+            <div className="border-t border-white/5 pt-3">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">Assessment</p>
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">
                 {structuredNote.assessment}
               </p>
             </div>
-            <div>
-              <p className="mb-1 text-[13px] font-semibold text-chat-muted">Plan:</p>
-              <p className="whitespace-pre-wrap text-[15px] leading-relaxed text-white/90">{structuredNote.plan}</p>
+            <div className="border-t border-white/5 pt-3">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">Plan</p>
+              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">{structuredNote.plan}</p>
             </div>
           </div>
         </Section>
 
         {icd10Suggestions && icd10Suggestions.length > 0 && (
           <Section title="5. ICD-10 Suggestions">
-            <ul className="m-0 flex list-none flex-col gap-2 p-0">
-              {icd10Suggestions.map((item) => (
-                <li key={item.code} className="text-[15px] leading-relaxed">
-                  <span className="font-mono text-[13px] text-white">{item.code}</span>
-                  <span className="text-chat-muted"> — {item.label}</span>
-                </li>
-              ))}
-            </ul>
+            <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
+              <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+                {icd10Suggestions.map((item) => (
+                  <li key={item.code} className="flex items-start gap-3 border-l-2 border-slate-600/50 pl-3">
+                    <div className="flex-1">
+                      <span className="inline-block rounded bg-slate-800/60 px-2 py-0.5 font-mono text-[12px] font-semibold text-slate-300">
+                        {item.code}
+                      </span>
+                      <p className="mt-1.5 text-[14px] leading-relaxed text-white/85">{item.label}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </Section>
         )}
       </div>
