@@ -41,7 +41,7 @@ export function createApp() {
 
   app.get("/", (req, res) => {
     res.status(200).json({
-      message: "Clinical assistant backend running",
+      message: "MedClaim AI backend running",
       aiConfigured: startupValidation.ok,
     });
   });

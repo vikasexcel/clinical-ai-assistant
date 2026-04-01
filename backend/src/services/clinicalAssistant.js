@@ -8,7 +8,7 @@ import {
 } from "../schemas/clinicalOutput.js";
 
 const clinicalAssistantAgent = new Agent({
-  name: "Clinical Assistant MVP",
+  name: "MedClaim AI MVP",
   model: appConfig.agentModel,
   instructions: clinicalAssistantPrompt,
   outputType: clinicalAssistantInsightsSchema,
