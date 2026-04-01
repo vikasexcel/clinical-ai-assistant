@@ -26,8 +26,17 @@ function StructuredResultComponent({ result }) {
     return null;
   }
 
-  const { billingDecision, mainIssue, actionableFixes, structuredNote, smartWarning, icd10Suggestions, inputSummary } =
-    result;
+  const {
+    billingDecision,
+    justification,
+    defensiveDocumentation,
+    mainIssue,
+    actionableFixes,
+    structuredNote,
+    smartWarning,
+    icd10Suggestions,
+    inputSummary,
+  } = result;
 
   return (
     <article className="text-[15px] leading-relaxed" aria-labelledby="response-title">
@@ -91,6 +100,51 @@ function StructuredResultComponent({ result }) {
           </div>
         </Section>
 
+        {justification && (
+          <Section title="2. Justification">
+            <div className="space-y-4 rounded-lg border border-sky-500/40 bg-sky-950/20 p-4">
+              <div className="border-l-2 border-sky-500 pl-3">
+                <p className="text-[11px] font-medium uppercase tracking-wider text-sky-400/80">Why this level is appropriate</p>
+                <p className="mt-2 text-[14px] leading-relaxed text-white/90">{justification.summary}</p>
+              </div>
+              <div className="border-t border-sky-500/20 pt-3">
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-sky-400/80">Complexity Factors Detected</p>
+                <ul className="m-0 space-y-1.5 pl-0">
+                  {justification.complexityFactors.map((factor, index) => (
+                    <li key={index} className="flex items-start gap-2 text-[14px] leading-relaxed text-sky-100/80">
+                      <span className="mt-1.5 text-sky-400">✓</span>
+                      <span>{factor}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Section>
+        )}
+
+        {defensiveDocumentation && (
+          <Section title="3. What to Include to Defend This Level">
+            <div className="space-y-4 rounded-lg border border-purple-500/40 bg-purple-950/20 p-4">
+              <p className="text-[13px] font-semibold text-purple-300/90">{defensiveDocumentation.header}</p>
+              <ul className="m-0 space-y-3 pl-0">
+                {defensiveDocumentation.requiredElements.map((item, index) => (
+                  <li key={index} className="flex gap-3 border-l-2 border-purple-600/40 pl-3">
+                    <span className="mt-1 text-[11px] font-bold text-purple-500/60">{index + 1}.</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[14px] leading-relaxed text-white/90">{item.element}</p>
+                      {item.example && (
+                        <div className="mt-2 rounded bg-purple-950/40 px-3 py-2 text-[13px] italic text-purple-100/60">
+                          "{item.example}"
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Section>
+        )}
+
         {smartWarning && (
           <Section title="⚠️ High Risk Warning">
             <div className="rounded-lg border border-red-500/50 bg-red-950/30 p-4">
@@ -106,7 +160,7 @@ function StructuredResultComponent({ result }) {
         )}
 
         {mainIssue && (
-          <Section title="2. Main Issue">
+          <Section title={justification || defensiveDocumentation ? "4. Main Issue" : "2. Main Issue"}>
             <div className="space-y-3 rounded-lg border border-amber-500/40 bg-amber-950/20 p-4">
               <div className="border-l-2 border-amber-500 pl-3">
                 <p className="text-[11px] font-medium uppercase tracking-wider text-amber-400/80">Issue</p>
@@ -120,7 +174,15 @@ function StructuredResultComponent({ result }) {
           </Section>
         )}
 
-        <Section title="3. Actionable Fixes">
+        <Section
+          title={
+            justification || defensiveDocumentation
+              ? mainIssue
+                ? "5. Actionable Fixes"
+                : "4. Actionable Fixes"
+              : "3. Actionable Fixes"
+          }
+        >
           <div className="space-y-4 rounded-lg border border-emerald-600/30 bg-emerald-950/20 p-4">
             <p className="text-[13px] font-semibold text-emerald-300/90">{actionableFixes.header}</p>
             <ul className="m-0 space-y-3 pl-0">
@@ -143,7 +205,15 @@ function StructuredResultComponent({ result }) {
           </div>
         </Section>
 
-        <Section title="4. Structured Note">
+        <Section
+          title={
+            justification || defensiveDocumentation
+              ? mainIssue
+                ? "6. Structured Note"
+                : "5. Structured Note"
+              : "4. Structured Note"
+          }
+        >
           <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-400/80">Chief Complaint</p>
@@ -169,7 +239,15 @@ function StructuredResultComponent({ result }) {
         </Section>
 
         {icd10Suggestions && icd10Suggestions.length > 0 && (
-          <Section title="5. ICD-10 Suggestions">
+          <Section
+            title={
+              justification || defensiveDocumentation
+                ? mainIssue
+                  ? "7. ICD-10 Suggestions"
+                  : "6. ICD-10 Suggestions"
+                : "5. ICD-10 Suggestions"
+            }
+          >
             <div className="rounded-lg border border-white/10 bg-white/[0.02] p-4">
               <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
                 {icd10Suggestions.map((item) => (

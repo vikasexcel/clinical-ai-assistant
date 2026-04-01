@@ -14,6 +14,26 @@ export const clinicalAssistantInsightsSchema = z.object({
     downcodingRisk: z.number().min(0).max(100),
     denialRisk: z.number().min(0).max(100),
   }),
+  justification: z
+    .object({
+      summary: z.string().min(1),
+      complexityFactors: z.array(z.string()).min(1),
+    })
+    .nullable(),
+  defensiveDocumentation: z
+    .object({
+      header: z.string().min(1),
+      requiredElements: z
+        .array(
+          z.object({
+            element: z.string().min(1),
+            example: z.string().nullable(),
+          }),
+        )
+        .min(1)
+        .max(5),
+    })
+    .nullable(),
   mainIssue: z
     .object({
       issue: z.string().min(1),
@@ -63,6 +83,8 @@ export const clinicalAnalysisResponseSchema = z.object({
     warnings: z.array(z.string()),
   }),
   billingDecision: clinicalAssistantInsightsSchema.shape.billingDecision,
+  justification: clinicalAssistantInsightsSchema.shape.justification,
+  defensiveDocumentation: clinicalAssistantInsightsSchema.shape.defensiveDocumentation,
   mainIssue: clinicalAssistantInsightsSchema.shape.mainIssue,
   actionableFixes: clinicalAssistantInsightsSchema.shape.actionableFixes,
   structuredNote: clinicalAssistantInsightsSchema.shape.structuredNote,

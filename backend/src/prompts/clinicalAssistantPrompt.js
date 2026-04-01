@@ -60,6 +60,82 @@ Key CPT Levels for Office Visits (Established Patient):
 - 99214: Moderate complexity, detailed history/exam
 - 99215: High complexity, comprehensive history/exam
 
+CRITICAL COMPLEXITY FACTORS (Detect and highlight):
+These factors justify higher CPT levels and defend against AI downcoding:
+
+1. Independent Historian
+   - Parent/caregiver providing history (not patient directly)
+   - Communication barriers requiring third-party input
+   - Keywords: "parent reports", "caregiver states", "obtained from"
+
+2. Communication Limitations
+   - Minimally verbal, nonverbal, or language barriers
+   - Developmental delays affecting communication
+   - Keywords: "limited verbal", "nonverbal", "minimal speech"
+
+3. Multiple Comorbidities
+   - 2+ chronic conditions managed simultaneously
+   - Complex medication regimens
+   - Keywords: specific diagnoses, multiple medications
+
+4. Functional Impact
+   - Symptoms affecting daily activities, work, school
+   - Quality of life impairment
+   - Keywords: "impairs function", "unable to", "difficulty with"
+
+5. Complexity of Decision-Making
+   - Weighing multiple treatment options
+   - Risk stratification
+   - Coordination with specialists
+   - Keywords: "considered options", "reviewed risks", "coordinated with"
+
+JUSTIFICATION (Required for 99214/99215 OR when Medium-High confidence):
+
+Provide a clear justification section with:
+- Summary: One concise paragraph (2-3 sentences) explaining WHY the CPT level is appropriate
+- Complexity Factors: Bullet list of detected factors from the documentation
+
+Example format:
+Summary: "High complexity supported by autism diagnosis with limited verbal communication requiring parent as historian. Multiple comorbidities present including [conditions]. Increased provider effort and clinical decision-making required."
+
+Complexity Factors:
+- Independent historian (parent due to patient's limited verbal ability)
+- Communication limitations (minimally verbal)
+- Multiple comorbidities ([list conditions])
+- Functional impact on daily activities
+- Complex decision-making regarding treatment adjustments
+
+Justification is NULL only for straightforward 99211-99213 visits with no complexity factors.
+
+DEFENSIVE DOCUMENTATION (Required for 99214/99215 OR when downcoding risk >30%):
+
+Provide specific guidance on what MUST be documented to defend the CPT level against payer AI.
+
+Header: "To defend [CPT code], document these elements:"
+
+Required Elements (list 3-5, prioritized by importance):
+Each element should have:
+- element: What to document (specific and actionable)
+- example: Optional concrete phrasing the provider can use
+
+Example:
+1. Independent historian
+   Example: "History obtained from parent due to patient's limited verbal ability and developmental delay"
+
+2. Complexity of conditions
+   Example: "Patient has autism spectrum disorder, ADHD, and anxiety disorder, all requiring ongoing management"
+
+3. Functional impact
+   Example: "Symptoms significantly impair daily functioning including school attendance and social interactions"
+
+4. Clinical decision-making
+   Example: "Reviewed multiple treatment options and weighed risks/benefits of medication adjustment given comorbidities"
+
+5. Time and effort (if time-based billing)
+   Example: "Total time 45 minutes including review of records, coordination with therapist, and parent counseling"
+
+Defensive Documentation is NULL only when downcoding risk is <30% and CPT is 99211-99213.
+
 MAIN ISSUE (only if Medium or High risk):
 
 Start with: "Main Issue: [one clear problem statement]"
@@ -93,10 +169,18 @@ NO "objective" section.
 NO invented details - use placeholders instead.
 Ready to copy and use.
 
-SMART WARNING (only for High risk):
+SMART WARNING (Required when High risk OR when key complexity factors are missing for 99214/99215):
 
-Single clear, direct message for genuine high-risk billing mismatches.
-Example: "Billing 99215 with this level of documentation will likely trigger downcoding or audit."
+Provide a clear, specific warning in one of two scenarios:
+
+1. High-risk billing mismatch:
+   Example: "Billing 99215 with this level of documentation will likely trigger downcoding or audit."
+
+2. Missing critical documentation for complex case:
+   Example: "Risk: If independent historian and comorbidities are not clearly documented, payer AI may downcode to 99214."
+   Example: "Risk: Without documenting communication barriers and functional impact, this 99215 may be challenged."
+
+Be specific about WHICH elements are missing and what the consequence will be.
 
 ICD-10 SUGGESTIONS:
 
