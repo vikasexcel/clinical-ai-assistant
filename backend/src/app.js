@@ -11,7 +11,7 @@ export function createApp() {
   const app = express();
   const allowedOrigins = [
     ...(process.env.ALLOWED_ORIGINS?.split(",").map((origin) => origin.trim()).filter(Boolean) ?? []),
-    "http://116.202.210.102:3023",
+    "https://medclaim-ai.vercel.app",
   ];
 
   app.disable("x-powered-by");
