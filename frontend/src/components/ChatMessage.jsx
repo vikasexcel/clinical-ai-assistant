@@ -20,7 +20,7 @@ function StepBadge({ index, phase }) {
   if (isDone) {
     return (
       <span
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-chat-accent/45 bg-chat-accent/15 text-[13px] font-semibold text-chat-accent"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-clinical-accent/35 bg-clinical-accent-soft text-[13px] font-semibold text-clinical-accent"
         aria-hidden="true"
       >
         ✓
@@ -31,7 +31,7 @@ function StepBadge({ index, phase }) {
   if (isActive) {
     return (
       <span
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-chat-accent text-[13px] font-semibold text-white shadow-[0_0_0_1px_rgba(16,163,127,0.35)]"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-clinical-accent text-[13px] font-semibold text-white shadow-sm"
         aria-hidden="true"
       >
         {index + 1}
@@ -41,7 +41,7 @@ function StepBadge({ index, phase }) {
 
   return (
     <span
-      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-chat-border bg-chat-elevated/80 text-[13px] font-medium text-chat-muted"
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-clinical-border bg-clinical-elevated text-[13px] font-medium text-clinical-muted"
       aria-hidden="true"
     >
       {index + 1}
@@ -52,22 +52,23 @@ function StepBadge({ index, phase }) {
 function StepSkeleton() {
   return (
     <div className="mt-3 flex flex-col gap-2" aria-hidden="true">
-      <div className="h-2 w-full max-w-[14rem] rounded-full bg-white/[0.14] animate-pulse" />
-      <div className="h-2 w-full max-w-[11rem] rounded-full bg-white/[0.11] animate-pulse" />
-      <div className="h-2 w-full max-w-[9rem] rounded-full bg-white/[0.09] animate-pulse" />
+      <div className="h-2 w-full max-w-[14rem] animate-pulse rounded-full bg-clinical-border-soft" />
+      <div className="h-2 w-full max-w-[11rem] animate-pulse rounded-full bg-clinical-border-soft" />
+      <div className="h-2 w-full max-w-[9rem] animate-pulse rounded-full bg-clinical-border-soft" />
     </div>
   );
 }
 
-function UserBubble({ text, imageFileName, hasAudio, audioDurationLabel, audioPreviewUrl }) {
+/** Read-only intake display — form-adjacent, not a chat bubble */
+function IntakeRecord({ text, imageFileName, hasAudio, audioDurationLabel, audioPreviewUrl }) {
   const hasText = text.trim().length > 0;
   const meta = [imageFileName ? imageFileName : null].filter(Boolean);
 
   return (
-    <article className="flex justify-end" aria-label="Your message">
-      <div className="max-w-[min(100%,28rem)] space-y-2.5 rounded-3xl bg-chat-elevated px-4 py-2.5 text-[15px] leading-relaxed text-white">
+    <article className="min-w-0" aria-label="Source intake">
+      <div className="rounded-lg border border-slate-200 bg-slate-50/90 px-4 py-3 text-[15px] leading-relaxed text-slate-900">
         {meta.length > 0 ? (
-          <p className="text-[12px] text-chat-muted">{meta.join(" · ")}</p>
+          <p className="mb-2 border-b border-slate-200/80 pb-2 font-mono text-[12px] text-slate-600">{meta.join(" · ")}</p>
         ) : null}
 
         {hasText ? (
@@ -75,18 +76,18 @@ function UserBubble({ text, imageFileName, hasAudio, audioDurationLabel, audioPr
         ) : null}
 
         {hasAudio && audioPreviewUrl ? (
-          <div className="rounded-2xl border border-white/[0.08] bg-chat-bg/45 px-3 py-2.5">
-            <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-white/50">
-              Voice memo · {audioDurationLabel}
+          <div className="mt-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-slate-500">
+              Voice attachment · {audioDurationLabel}
             </p>
             <VoiceAudioPlayer src={audioPreviewUrl} />
           </div>
         ) : hasAudio ? (
-          <p className="text-[12px] text-chat-muted">Voice {audioDurationLabel}</p>
+          <p className="text-[12px] text-slate-600">Voice {audioDurationLabel}</p>
         ) : null}
 
         {!hasText && !hasAudio && !imageFileName ? (
-          <p className="text-chat-muted italic">Attachments only</p>
+          <p className="italic text-slate-500">Image or attachment only</p>
         ) : null}
       </div>
     </article>
@@ -108,69 +109,70 @@ function AssistantLoading() {
   const activeLabel = CLINICAL_LOADING_STEPS[phase] ?? CLINICAL_LOADING_STEPS[0];
 
   return (
-    <div
-      className="max-w-[min(100%,26rem)] rounded-xl border border-white/[0.08] bg-chat-elevated/90 px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-      aria-busy="true"
-      aria-live="polite"
-      role="status"
-    >
-      <p className="mb-4 text-[11px] font-medium uppercase tracking-[0.08em] text-white/55">
-        Drafting clinical output
-      </p>
-      <p className="sr-only">Current step: {activeLabel}</p>
-      <ol className="m-0 flex list-none flex-col gap-0 p-0">
-        {CLINICAL_LOADING_STEPS.map((label, index) => {
-          const isDone = index < phase;
-          const isActive = index === phase;
-          const isLast = index === CLINICAL_LOADING_STEPS.length - 1;
+    <div className="w-full min-w-0">
+      <div
+        className="w-full rounded-xl border border-clinical-border bg-clinical-elevated/60 px-4 py-4 sm:px-5 sm:py-5"
+        aria-busy="true"
+        aria-live="polite"
+        role="status"
+      >
+        <p className="sr-only">Current step: {activeLabel}</p>
+        <ol className="m-0 flex list-none flex-col gap-0 p-0">
+          {CLINICAL_LOADING_STEPS.map((label, index) => {
+            const isDone = index < phase;
+            const isActive = index === phase;
+            const isLast = index === CLINICAL_LOADING_STEPS.length - 1;
 
-          return (
-            <li key={label} className="relative flex gap-3.5 pb-4 last:pb-0">
-              {/* Full-height segment, centered on 28px badge column (14px = half of w-7) */}
-              {!isLast ? (
-                <div
-                  className="pointer-events-none absolute left-[14px] top-[2rem] z-0 bottom-0 w-[2px] -translate-x-1/2 rounded-full bg-gradient-to-b from-white/26 via-white/16 to-white/10"
-                  aria-hidden="true"
-                />
-              ) : null}
-              <div className="relative z-10 flex w-7 shrink-0 justify-center">
-                <StepBadge index={index} phase={phase} />
-              </div>
+            return (
+              <li key={label} className="relative flex gap-3.5 pb-4 last:pb-0">
+                {!isLast ? (
+                  <div
+                    className="pointer-events-none absolute bottom-0 left-[14px] top-[2rem] z-0 w-[2px] -translate-x-1/2 rounded-full bg-gradient-to-b from-clinical-border via-clinical-border-soft to-transparent"
+                    aria-hidden="true"
+                  />
+                ) : null}
+                <div className="relative z-10 flex w-7 shrink-0 justify-center">
+                  <StepBadge index={index} phase={phase} />
+                </div>
 
-              <div className="relative z-10 min-w-0 flex-1 pt-0.5">
-                <p
-                  className={`text-[15px] leading-[1.45] ${
-                    isActive
-                      ? "font-medium text-white"
-                      : isDone
-                        ? "font-normal text-white/72"
-                        : "font-normal text-white/42"
-                  }`}
-                >
-                  {label}
-                </p>
-                {isActive ? <StepSkeleton /> : null}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+                <div className="relative z-10 min-w-0 flex-1 pt-0.5">
+                  <p
+                    className={`text-[15px] leading-[1.45] ${
+                      isActive
+                        ? "font-medium text-clinical-ink"
+                        : isDone
+                          ? "font-normal text-clinical-muted"
+                          : "font-normal text-clinical-muted/70"
+                    }`}
+                  >
+                    {label}
+                  </p>
+                  {isActive ? <StepSkeleton /> : null}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
     </div>
   );
 }
 
 function AssistantError({ message }) {
   return (
-    <div className="max-w-[min(100%,36rem)] rounded-xl border border-red-500/30 bg-red-950/35 px-4 py-3 text-[15px] text-red-100" role="alert">
+    <div
+      className="w-full rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[15px] text-red-950"
+      role="alert"
+    >
       {message}
     </div>
   );
 }
 
-export function ChatMessage({ message }) {
+export function ChatMessage({ message, hideLabels = false }) {
   if (message.role === "user") {
     return (
-      <UserBubble
+      <IntakeRecord
         audioDurationLabel={message.audioDurationLabel}
         audioPreviewUrl={message.audioPreviewUrl}
         hasAudio={message.hasAudio}
@@ -182,7 +184,14 @@ export function ChatMessage({ message }) {
 
   if (message.role === "assistant") {
     if (message.pending) {
-      return <AssistantLoading />;
+      return (
+        <div className="min-w-0 w-full">
+          {hideLabels ? null : (
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-clinical-muted">Processing</p>
+          )}
+          <AssistantLoading />
+        </div>
+      );
     }
     if (message.error) {
       return <AssistantError message={message.error} />;
@@ -190,6 +199,9 @@ export function ChatMessage({ message }) {
     if (message.result) {
       return (
         <div className="min-w-0 w-full">
+          {hideLabels ? null : (
+            <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-clinical-muted">Structured output</p>
+          )}
           <StructuredResult result={message.result} />
         </div>
       );

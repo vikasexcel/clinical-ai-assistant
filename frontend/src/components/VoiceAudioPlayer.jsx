@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { formatPlaybackTime } from "../lib/formatDuration.js";
 
 /**
- * Theme-matched mini player (replaces native `<audio controls>`).
+ * Minimal player (replaces native `<audio controls>`).
  */
 export function VoiceAudioPlayer({ src, className = "" }) {
   const audioRef = useRef(null);
@@ -27,11 +27,13 @@ export function VoiceAudioPlayer({ src, className = "" }) {
     };
 
     el.pause();
-    setPlaying(false);
-    setCurrentTime(0);
-    setDuration(0);
     el.src = src;
     el.load();
+    queueMicrotask(() => {
+      setPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+    });
 
     el.addEventListener("loadedmetadata", onLoaded);
     el.addEventListener("timeupdate", onTime);
@@ -85,7 +87,7 @@ export function VoiceAudioPlayer({ src, className = "" }) {
       <button
         type="button"
         onClick={toggle}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white transition hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-chat-accent/50"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-clinical-border bg-clinical-elevated text-clinical-ink transition hover:bg-clinical-accent-soft focus:outline-none focus-visible:ring-2 focus-visible:ring-clinical-accent/35"
         aria-label={playing ? "Pause voice memo" : "Play voice memo"}
       >
         {playing ? (
@@ -108,7 +110,7 @@ export function VoiceAudioPlayer({ src, className = "" }) {
           {[0.35, 0.55, 0.85, 0.5, 0.7, 0.45, 0.9, 0.4].map((h, i) => (
             <span
               key={i}
-              className="w-0.5 rounded-full bg-chat-accent/50"
+              className="w-0.5 rounded-full bg-clinical-accent/45"
               style={{ height: `${h * 100}%` }}
             />
           ))}
@@ -116,18 +118,18 @@ export function VoiceAudioPlayer({ src, className = "" }) {
 
         <button
           type="button"
-          className="group relative h-2.5 min-w-[6rem] flex-1 cursor-pointer rounded-full bg-white/10 text-left"
+          className="group relative h-2.5 min-w-[6rem] flex-1 cursor-pointer rounded-full bg-clinical-border-soft text-left"
           onClick={onSeek}
           aria-label="Seek audio"
         >
           <span
-            className="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-chat-accent/90 transition-[width] duration-75 ease-out"
+            className="pointer-events-none absolute inset-y-0 left-0 rounded-full bg-clinical-accent transition-[width] duration-75 ease-out"
             style={{ width: `${progressPct}%` }}
           />
         </button>
       </div>
 
-      <span className="shrink-0 tabular-nums text-[12px] text-chat-muted">
+      <span className="shrink-0 tabular-nums text-[12px] text-clinical-muted">
         {formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}
       </span>
     </div>

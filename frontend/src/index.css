@@ -1,20 +1,37 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Literata", ui-serif, Georgia, "Times New Roman", serif;
 
-  --color-chat-bg: #212121;
-  --color-chat-surface: #2f2f2f;
-  --color-chat-elevated: #3a3a3a;
-  --color-chat-border: rgba(255, 255, 255, 0.12);
-  --color-chat-muted: rgba(255, 255, 255, 0.55);
-  --color-chat-accent: #10a37f;
-  --color-chat-accent-strong: #1a7f64;
-  --color-chat-warm: rgba(255, 200, 120, 0.85);
+  /* Clinical workbench — calm paper, deep teal accent (not generic “AI green”) */
+  --color-clinical-bg: #eef1ed;
+  --color-clinical-bg-soft: #e4e9e4;
+  --color-clinical-surface: #fdfcf9;
+  --color-clinical-elevated: #f3f1ec;
+  --color-clinical-ink: #161917;
+  --color-clinical-muted: #5a635e;
+  --color-clinical-border: rgba(22, 25, 23, 0.1);
+  --color-clinical-border-soft: rgba(22, 25, 23, 0.06);
+  /* Darker fill so white label meets WCAG contrast; explicit foreground token for buttons */
+  --color-clinical-accent: #0a3d34;
+  --color-clinical-accent-hover: #082f28;
+  --color-clinical-on-accent: #ffffff;
+  --color-clinical-accent-soft: #d9ebe6;
+  --color-clinical-line: rgba(15, 92, 77, 0.35);
+
+  /* Legacy chat-* aliases map to clinical tokens for gradual migration */
+  --color-chat-bg: var(--color-clinical-bg);
+  --color-chat-surface: var(--color-clinical-surface);
+  --color-chat-elevated: var(--color-clinical-elevated);
+  --color-chat-border: var(--color-clinical-border);
+  --color-chat-muted: var(--color-clinical-muted);
+  --color-chat-accent: var(--color-clinical-accent);
+  --color-chat-accent-strong: var(--color-clinical-accent-hover);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -41,8 +58,16 @@ body {
   height: 100svh;
   overflow: hidden;
   font-family: var(--font-sans);
-  background-color: var(--color-chat-bg);
-  color: #ececec;
+  background-color: var(--color-clinical-bg);
+  --clinical-bg-image: radial-gradient(
+      120% 80% at 50% -20%,
+      rgba(15, 92, 77, 0.07),
+      transparent 55%
+    ),
+    radial-gradient(80% 50% at 100% 0%, rgba(212, 196, 176, 0.12), transparent 45%);
+  background-image: var(--clinical-bg-image);
+  background-attachment: fixed;
+  color: var(--color-clinical-ink);
 }
 
 body,
@@ -53,7 +78,7 @@ select {
   font: inherit;
 }
 
-button,
+/* Omit `button` so utility text colors (e.g. white on primary) are not overridden by body `color` */
 input,
 textarea,
 select {
@@ -89,6 +114,17 @@ dl {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes clinicalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

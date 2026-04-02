@@ -48,7 +48,6 @@ export default function App() {
     setStatus("");
     setIsSubmitting(true);
 
-    // Clear composer immediately so the textarea is ready for the next message while the request runs.
     setText("");
     setImageFile(null);
 
@@ -114,37 +113,55 @@ export default function App() {
   return (
     <>
       <a
-        className="absolute left-4 top-4 z-50 -translate-y-[200%] rounded-lg border border-chat-border bg-chat-surface px-3 py-2 text-sm text-white transition focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-white/20"
+        className="absolute left-4 top-4 z-50 -translate-y-[200%] rounded-lg border border-clinical-border bg-clinical-surface px-3 py-2 text-sm text-clinical-ink shadow-sm transition focus:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-clinical-accent/35"
         href="#main-content"
       >
         Skip to main content
       </a>
 
-      <div className="flex h-svh max-h-svh min-h-0 flex-col overflow-hidden bg-chat-bg">
+      <div className="flex h-svh max-h-svh min-h-0 flex-col overflow-hidden bg-transparent">
         <ChatHeader disableNewChat={isSubmitting} onNewChat={handleClearChat} />
 
-        <main id="main-content" className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {activeStatusMessage ? (
-            <div className="mx-auto w-full max-w-3xl shrink-0 px-3 pt-2 sm:px-4">
-              <StatusBanner message={activeStatusMessage} tone={recorder.error ? "error" : statusTone} />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
+          {/* Left: encounter intake (form workspace — not a chat composer dock) */}
+          <aside className="flex min-h-0 shrink-0 flex-col border-clinical-border-soft bg-clinical-surface/90 lg:w-[min(100%,26rem)] lg:border-r lg:pt-0">
+            <div className="border-b border-clinical-border-soft px-4 py-4 sm:px-5 lg:border-b-0 lg:pt-5">
+              <h2 className="font-display text-[1.15rem] font-semibold tracking-tight text-clinical-ink">
+                Encounter intake
+              </h2>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-clinical-muted">
+                Add free-text notes, an image, or a voice clip. This is structured like a documentation form, not a chat thread.
+              </p>
             </div>
-          ) : null}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+              <ChatComposer
+                imageFile={imageFile}
+                isSubmitting={isSubmitting}
+                onImageChange={handleImageChange}
+                onReset={handleReset}
+                onSubmit={handleSubmit}
+                onTextChange={handleTextChange}
+                recorder={recorder}
+                text={text}
+              />
+            </div>
+          </aside>
 
-          <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth overscroll-y-contain">
-            <ChatThread messages={messages} />
-          </div>
-
-          <ChatComposer
-            imageFile={imageFile}
-            isSubmitting={isSubmitting}
-            onImageChange={handleImageChange}
-            onReset={handleReset}
-            onSubmit={handleSubmit}
-            onTextChange={handleTextChange}
-            recorder={recorder}
-            text={text}
-          />
-        </main>
+          {/* Right: documentation output (chart-style preview pane) */}
+          <main
+            id="main-content"
+            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-clinical-bg/40"
+          >
+            {activeStatusMessage ? (
+              <div className="shrink-0 border-b border-clinical-border-soft bg-clinical-surface/60 px-4 py-3 sm:px-6">
+                <StatusBanner message={activeStatusMessage} tone={recorder.error ? "error" : statusTone} />
+              </div>
+            ) : null}
+            <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth overscroll-y-contain">
+              <ChatThread messages={messages} />
+            </div>
+          </main>
+        </div>
       </div>
     </>
   );
