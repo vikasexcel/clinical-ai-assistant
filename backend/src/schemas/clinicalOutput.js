@@ -9,29 +9,18 @@ export const clinicalAssistantInsightsSchema = z.object({
       code: z.string().min(1),
       label: z.string().min(1),
     }),
+    cptJustification: z.string().min(1),
     confidence: confidenceLevelSchema,
     riskLevel: riskLevelSchema,
     downcodingRisk: z.number().min(0).max(100),
     denialRisk: z.number().min(0).max(100),
   }),
+  lightDefensiveGuidance: z.string().min(1),
+  downcodeRiskLine: z.string().min(1),
   justification: z
     .object({
       summary: z.string().min(1),
       complexityFactors: z.array(z.string()).min(1),
-    })
-    .nullable(),
-  defensiveDocumentation: z
-    .object({
-      header: z.string().min(1),
-      requiredElements: z
-        .array(
-          z.object({
-            element: z.string().min(1),
-            example: z.string().nullable(),
-          }),
-        )
-        .min(1)
-        .max(5),
     })
     .nullable(),
   mainIssue: z
@@ -40,9 +29,9 @@ export const clinicalAssistantInsightsSchema = z.object({
       whyItMatters: z.string().min(1),
     })
     .nullable(),
-  actionableFixes: z.object({
+  supportGuidance: z.object({
     header: z.string().min(1),
-    fixes: z
+    items: z
       .array(
         z.object({
           action: z.string().min(1),
@@ -63,14 +52,20 @@ export const clinicalAssistantInsightsSchema = z.object({
       message: z.string().min(1),
     })
     .nullable(),
-  icd10Suggestions: z
-    .array(
-      z.object({
-        code: z.string().min(1),
-        label: z.string().min(1),
-      }),
-    )
-    .max(3),
+  icd10: z.object({
+    primary: z.object({
+      code: z.string().min(1),
+      label: z.string().min(1),
+    }),
+    secondaryCodes: z
+      .array(
+        z.object({
+          code: z.string().min(1),
+          label: z.string().min(1),
+        }),
+      )
+      .max(2),
+  }),
 });
 
 export const clinicalAnalysisResponseSchema = z.object({
@@ -83,11 +78,12 @@ export const clinicalAnalysisResponseSchema = z.object({
     warnings: z.array(z.string()),
   }),
   billingDecision: clinicalAssistantInsightsSchema.shape.billingDecision,
+  lightDefensiveGuidance: clinicalAssistantInsightsSchema.shape.lightDefensiveGuidance,
+  downcodeRiskLine: clinicalAssistantInsightsSchema.shape.downcodeRiskLine,
   justification: clinicalAssistantInsightsSchema.shape.justification,
-  defensiveDocumentation: clinicalAssistantInsightsSchema.shape.defensiveDocumentation,
   mainIssue: clinicalAssistantInsightsSchema.shape.mainIssue,
-  actionableFixes: clinicalAssistantInsightsSchema.shape.actionableFixes,
+  supportGuidance: clinicalAssistantInsightsSchema.shape.supportGuidance,
   structuredNote: clinicalAssistantInsightsSchema.shape.structuredNote,
   smartWarning: clinicalAssistantInsightsSchema.shape.smartWarning,
-  icd10Suggestions: clinicalAssistantInsightsSchema.shape.icd10Suggestions,
+  icd10: clinicalAssistantInsightsSchema.shape.icd10,
 });
