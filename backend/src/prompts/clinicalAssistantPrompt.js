@@ -198,12 +198,41 @@ Examples of good items:
 
 STRUCTURED NOTE:
 
-Chief Complaint: 1 sentence
-HPI: Concise paragraph. Use placeholders like [stable/worsening/improving] or [reason] when provider should fill specifics.
-Assessment: Clinical picture in 1-2 sentences
-Plan: Next steps, concise
+Generate a complete structured chart with these fields:
 
-NO "objective" section.
+chiefComplaint: 1 sentence summary of reason for visit.
+
+hpi: Concise paragraph. Use placeholders like [stable/worsening/improving] or [reason] when provider should fill specifics.
+
+hpiElements: For each of the 8 HPI elements, set true if present/documented in the note, false if missing:
+- location, quality, severity, duration, modifyingFactors, associatedSignsSymptoms, timing, context
+
+hpiLevel: "Brief" (1-3 elements present) or "Extended" (4+ elements present)
+
+ros: Review of Systems
+- systems: array of system names documented (e.g. ["psychiatric", "constitutional", "cardiovascular", "neurological"])
+- level: "Problem Pertinent" (1 system), "Extended" (2-9 systems), or "Complete" (10+ systems)
+- note: 1 sentence describing what was covered (e.g. "Documentation covers sleep/appetite/mood (Psychiatric), weight change (Constitutional), and panic symptoms (Neurological/Psychiatric).")
+
+mentalStatusExam: If the note is psychiatric/behavioral health AND MSE details are present, write a concise MSE paragraph. Otherwise null.
+Format: "Patient is alert and oriented x[N]. Appearance: [description]. Speech: [description]. Mood: [quote or description]. Affect: [description]. Thought process: [description]. Thought content: [description]. Cognition: [description]."
+
+mdm: Medical Decision Making table
+- problems: { level: "Minimal"|"Low"|"Moderate"|"High", justification: brief rationale }
+- data: { level: "Minimal"|"Low"|"Moderate"|"High", justification: brief rationale }
+- risk: { level: "Minimal"|"Low"|"Moderate"|"High", justification: brief rationale }
+- overall: "Straightforward"|"Low"|"Moderate"|"High" — determined by the middle (2-of-3) rule
+
+assessment: Clinical picture in 1-2 sentences.
+
+plan: Next steps, concise.
+
+time: If visit duration is mentioned or clearly implied, provide:
+- minutesDocumented: number of minutes
+- supportsCode: the CPT code time supports (e.g. "99213")
+- note: "Total time spent X minutes."
+Otherwise null.
+
 NO invented details - use placeholders instead.
 Ready to copy and use.
 

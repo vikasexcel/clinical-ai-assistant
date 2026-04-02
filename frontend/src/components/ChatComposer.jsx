@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { formatDuration } from "../lib/formatDuration.js";
+import { SampleScenarioMenu } from "./SampleScenarioMenu.jsx";
+import { VoiceAudioPlayer } from "./VoiceAudioPlayer.jsx";
 
 export function ChatComposer({
   imageFile,
@@ -43,6 +45,16 @@ export function ChatComposer({
               autoComplete="off"
               className="max-h-[min(40vh,200px)] min-h-[44px] w-full resize-none border-0 bg-transparent text-[15px] leading-relaxed text-white placeholder:text-chat-muted outline-none ring-0"
               onChange={onTextChange}
+              onKeyDown={(event) => {
+                if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) {
+                  return;
+                }
+                event.preventDefault();
+                if (!canSubmit || isSubmitting) {
+                  return;
+                }
+                event.currentTarget.form?.requestSubmit();
+              }}
               placeholder="Message…"
               rows={1}
               value={text}
@@ -65,6 +77,37 @@ export function ChatComposer({
                 </button>
               </div>
             )}
+
+            {recorder.isRecording ? (
+              <div className="flex items-center gap-3 rounded-xl border border-red-500/35 bg-red-950/25 px-3 py-2.5">
+                <span className="relative flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400/70" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                </span>
+                <span className="text-[13px] font-medium text-white/95">Recording</span>
+                <span className="ml-auto tabular-nums text-[13px] text-white/60">
+                  {formatDuration(recorder.durationSeconds)}
+                </span>
+              </div>
+            ) : null}
+
+            {recorder.audioUrl && !recorder.isRecording ? (
+              <div className="rounded-xl border border-white/[0.08] bg-chat-bg/40 px-3 py-2.5">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-medium uppercase tracking-[0.06em] text-white/50">
+                    Voice memo ready
+                  </span>
+                  <button
+                    type="button"
+                    onClick={recorder.clearRecording}
+                    className="text-[12px] text-chat-muted underline-offset-2 transition hover:text-white hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <VoiceAudioPlayer src={recorder.audioUrl} />
+              </div>
+            ) : null}
 
             <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] pt-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -91,23 +134,25 @@ export function ChatComposer({
                 >
                   {recorder.isRecording ? "Stop" : "Voice"}
                 </button>
-                <button
-                  className="rounded-lg px-2 py-1.5 text-[13px] text-chat-muted transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={isSubmitting || (!recorder.audioBlob && !recorder.isRecording)}
-                  onClick={recorder.clearRecording}
-                  type="button"
-                >
-                  Clear audio
-                </button>
-                <span className="text-[12px] text-chat-muted/90">
-                  {recorder.isSupported
-                    ? recorder.isRecording
-                      ? formatDuration(recorder.durationSeconds)
-                      : recorder.audioBlob
-                        ? formatDuration(recorder.durationSeconds)
-                        : null
-                    : null}
+                {recorder.audioUrl && !recorder.isRecording ? null : (
+                  <button
+                    className="rounded-lg px-2 py-1.5 text-[13px] text-chat-muted transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                    disabled={isSubmitting || (!recorder.audioBlob && !recorder.isRecording)}
+                    onClick={recorder.clearRecording}
+                    type="button"
+                  >
+                    Clear audio
+                  </button>
+                )}
+
+                <span className="text-white/15" aria-hidden="true">
+                  ·
                 </span>
+
+                <SampleScenarioMenu
+                  disabled={isSubmitting}
+                  onSelectText={(value) => onTextChange({ target: { value } })}
+                />
               </div>
 
               <div className="flex items-center gap-2">
@@ -129,12 +174,6 @@ export function ChatComposer({
               </div>
             </div>
           </div>
-
-          {recorder.audioUrl ? (
-            <audio className="h-8 w-full max-w-md" controls preload="metadata" src={recorder.audioUrl}>
-              Your browser does not support audio playback.
-            </audio>
-          ) : null}
 
           {recorder.error && (
             <p className="px-1 text-center text-[12px] text-red-300/90">

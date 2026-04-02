@@ -38,6 +38,7 @@ export default function App() {
       imageFileName: draftImage?.name ?? null,
       hasAudio: Boolean(audioBlob),
       audioDurationLabel: formatDuration(audioDurationSeconds),
+      audioPreviewUrl: audioBlob ? URL.createObjectURL(audioBlob) : null,
     };
 
     const loadingId = createId();
@@ -46,6 +47,10 @@ export default function App() {
     setMessages((previous) => [...previous, userMessage, loadingMessage]);
     setStatus("");
     setIsSubmitting(true);
+
+    // Clear composer immediately so the textarea is ready for the next message while the request runs.
+    setText("");
+    setImageFile(null);
 
     try {
       const response = await submitClinicalDraft({
@@ -59,6 +64,7 @@ export default function App() {
           message.id === loadingId ? { id: loadingId, role: "assistant", result: response } : message,
         ),
       );
+      recorder.clearRecording();
       setStatus("Ready — review before saving to the chart.");
     } catch (error) {
       setMessages((previous) =>
@@ -66,6 +72,8 @@ export default function App() {
           message.id === loadingId ? { id: loadingId, role: "assistant", error: error.message } : message,
         ),
       );
+      setText(draftText);
+      setImageFile(draftImage);
       setStatus("");
     } finally {
       setIsSubmitting(false);
@@ -88,7 +96,14 @@ export default function App() {
   }
 
   function handleClearChat() {
-    setMessages([]);
+    setMessages((previous) => {
+      for (const message of previous) {
+        if (message.audioPreviewUrl) {
+          URL.revokeObjectURL(message.audioPreviewUrl);
+        }
+      }
+      return [];
+    });
     setStatus("");
     handleReset();
   }

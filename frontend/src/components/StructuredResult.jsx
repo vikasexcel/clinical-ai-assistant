@@ -208,28 +208,172 @@ function StructuredResultComponent({ result }) {
           </div>
         </Section>
 
-        {/* ── c. Structured Note ── */}
-        <Section title="c. Structured Note">
-          <div className="space-y-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
-            <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-indigo-400/80">Chief Complaint</p>
-              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/95">
-                {structuredNote.chiefComplaint}
-              </p>
+        {/* ── c. Structured Chart ── */}
+        <Section title="c. Structured Chart">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] overflow-hidden">
+
+            {/* Header bar */}
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
+              <h4 className="text-[14px] font-semibold text-white/90">Structured Chart</h4>
+              <button
+                onClick={() => {
+                  const lines = [
+                    `CHIEF COMPLAINT\n${structuredNote.chiefComplaint}`,
+                    `\nHISTORY OF PRESENT ILLNESS\n${structuredNote.hpi}`,
+                    structuredNote.ros ? `\nREVIEW OF SYSTEMS\n${structuredNote.ros.note}` : null,
+                    structuredNote.mentalStatusExam ? `\nMENTAL STATUS EXAM\n${structuredNote.mentalStatusExam}` : null,
+                    structuredNote.mdm ? `\nMEDICAL DECISION MAKING\nOverall: ${structuredNote.mdm.overall}` : null,
+                    `\nASSESSMENT\n${structuredNote.assessment}`,
+                    `\nPLAN\n${structuredNote.plan}`,
+                  ].filter(Boolean).join("\n");
+                  navigator.clipboard?.writeText(lines);
+                }}
+                className="flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] text-white/60 transition hover:bg-white/10 hover:text-white/80"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+                Copy
+              </button>
             </div>
-            <div className="border-t border-white/5 pt-3">
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">HPI</p>
-              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">{structuredNote.hpi}</p>
-            </div>
-            <div className="border-t border-white/5 pt-3">
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">Assessment</p>
-              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">
-                {structuredNote.assessment}
-              </p>
-            </div>
-            <div className="border-t border-white/5 pt-3">
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">Plan</p>
-              <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">{structuredNote.plan}</p>
+
+            <div className="divide-y divide-white/[0.06] px-5">
+
+              {/* Chief Complaint */}
+              <div className="py-4">
+                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-indigo-400">Chief Complaint</p>
+                <p className="text-[14px] leading-relaxed text-white/90">{structuredNote.chiefComplaint}</p>
+              </div>
+
+              {/* HPI */}
+              <div className="py-4">
+                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-white/50">History of Present Illness</p>
+                <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">{structuredNote.hpi}</p>
+                {/* HPI element tags */}
+                {structuredNote.hpiElements && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {[
+                      { key: "location", label: "location" },
+                      { key: "quality", label: "quality" },
+                      { key: "severity", label: "severity" },
+                      { key: "duration", label: "duration" },
+                      { key: "modifyingFactors", label: "modifying factors" },
+                      { key: "associatedSignsSymptoms", label: "associated signs/symptoms" },
+                      { key: "timing", label: "timing" },
+                      { key: "context", label: "context" },
+                    ].map(({ key, label }) => {
+                      const present = structuredNote.hpiElements[key];
+                      return (
+                        <span
+                          key={key}
+                          className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
+                            present
+                              ? "bg-indigo-500/15 text-indigo-300/90 ring-1 ring-indigo-500/25"
+                              : "bg-amber-500/10 text-amber-400/80 ring-1 ring-amber-500/20"
+                          }`}
+                        >
+                          {present ? label : `${label} (missing)`}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+                {structuredNote.hpiLevel && (
+                  <p className="mt-2 text-[12px] text-white/40">HPI Level: {structuredNote.hpiLevel}</p>
+                )}
+              </div>
+
+              {/* Review of Systems */}
+              {structuredNote.ros && (
+                <div className="py-4">
+                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Review of Systems</p>
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {structuredNote.ros.systems.map((system) => (
+                      <span
+                        key={system}
+                        className="rounded-full bg-white/[0.08] px-2.5 py-0.5 text-[11px] font-medium text-white/70 ring-1 ring-white/10"
+                      >
+                        {system}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-[12px] leading-relaxed text-white/50">
+                    ROS Level: {structuredNote.ros.level} — {structuredNote.ros.note}
+                  </p>
+                </div>
+              )}
+
+              {/* Mental Status Exam */}
+              {structuredNote.mentalStatusExam && (
+                <div className="py-4">
+                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Mental Status Exam</p>
+                  <p className="text-[14px] leading-relaxed text-white/85">{structuredNote.mentalStatusExam}</p>
+                </div>
+              )}
+
+              {/* MDM Table */}
+              {structuredNote.mdm && (
+                <div className="py-4">
+                  <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-white/50">Medical Decision Making</p>
+                  <div className="overflow-hidden rounded-lg border border-white/10">
+                    <table className="w-full border-collapse text-[13px]">
+                      <thead>
+                        <tr className="border-b border-white/10 bg-white/[0.04]">
+                          <th className="py-2 pl-3 pr-2 text-left font-semibold text-white/60">Component</th>
+                          <th className="py-2 px-2 text-left font-semibold text-white/60">Level</th>
+                          <th className="py-2 pl-2 pr-3 text-left font-semibold text-white/60">Justification</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.05]">
+                        {[
+                          { label: "Problems", data: structuredNote.mdm.problems },
+                          { label: "Data", data: structuredNote.mdm.data },
+                          { label: "Risk", data: structuredNote.mdm.risk },
+                        ].map(({ label, data }) => (
+                          <tr key={label}>
+                            <td className="py-2.5 pl-3 pr-2 font-medium text-white/85">{label}</td>
+                            <td className="py-2.5 px-2">
+                              <span className={`inline-block rounded px-2 py-0.5 text-[12px] font-semibold ${
+                                data.level === "High" ? "bg-red-500/15 text-red-300" :
+                                data.level === "Moderate" ? "bg-amber-500/15 text-amber-300" :
+                                data.level === "Low" ? "bg-sky-500/15 text-sky-300" :
+                                "bg-white/[0.08] text-white/60"
+                              }`}>
+                                {data.level}
+                              </span>
+                            </td>
+                            <td className="py-2.5 pl-2 pr-3 text-white/70">{data.justification}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="mt-2 text-[12px] text-white/50">
+                    Overall MDM Level: <span className="font-semibold text-white/75">{structuredNote.mdm.overall}</span>
+                  </p>
+                </div>
+              )}
+
+              {/* Plan */}
+              <div className="py-4">
+                <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Plan</p>
+                <p className="whitespace-pre-wrap text-[14px] leading-relaxed text-white/85">{structuredNote.plan}</p>
+              </div>
+
+              {/* Time */}
+              {structuredNote.time && (
+                <div className="py-4">
+                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-widest text-white/50">Time</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[14px] text-white/85">
+                      {structuredNote.time.minutesDocumented} minutes documented
+                    </span>
+                    <span className="rounded-full bg-sky-500/15 px-2.5 py-0.5 text-[12px] font-semibold text-sky-300 ring-1 ring-sky-500/25">
+                      Supports {structuredNote.time.supportsCode}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-[12px] text-white/45">{structuredNote.time.note}</p>
+                </div>
+              )}
+
             </div>
           </div>
         </Section>

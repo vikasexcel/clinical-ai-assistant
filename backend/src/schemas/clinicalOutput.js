@@ -44,8 +44,36 @@ export const clinicalAssistantInsightsSchema = z.object({
   structuredNote: z.object({
     chiefComplaint: z.string().min(1),
     hpi: z.string().min(1),
+    hpiElements: z.object({
+      location: z.boolean(),
+      quality: z.boolean(),
+      severity: z.boolean(),
+      duration: z.boolean(),
+      modifyingFactors: z.boolean(),
+      associatedSignsSymptoms: z.boolean(),
+      timing: z.boolean(),
+      context: z.boolean(),
+    }),
+    hpiLevel: z.enum(["Brief", "Extended"]),
+    ros: z.object({
+      systems: z.array(z.string()).min(1),
+      level: z.enum(["Problem Pertinent", "Extended", "Complete"]),
+      note: z.string().min(1),
+    }),
+    mentalStatusExam: z.string().nullable(),
+    mdm: z.object({
+      problems: z.object({ level: z.enum(["Minimal", "Low", "Moderate", "High"]), justification: z.string().min(1) }),
+      data: z.object({ level: z.enum(["Minimal", "Low", "Moderate", "High"]), justification: z.string().min(1) }),
+      risk: z.object({ level: z.enum(["Minimal", "Low", "Moderate", "High"]), justification: z.string().min(1) }),
+      overall: z.enum(["Straightforward", "Low", "Moderate", "High"]),
+    }),
     assessment: z.string().min(1),
     plan: z.string().min(1),
+    time: z.object({
+      minutesDocumented: z.number().min(1),
+      supportsCode: z.string().min(1),
+      note: z.string().min(1),
+    }).nullable(),
   }),
   smartWarning: z
     .object({
