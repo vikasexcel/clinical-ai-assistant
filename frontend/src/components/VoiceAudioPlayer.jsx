@@ -81,7 +81,7 @@ export function VoiceAudioPlayer({ src, className = "" }) {
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className={`flex min-w-0 items-center gap-2.5 ${className}`}>
+    <div className={`flex min-w-0 flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-2.5 ${className}`}>
       <audio ref={audioRef} preload="metadata" src={src} className="hidden" />
 
       <button
@@ -102,7 +102,7 @@ export function VoiceAudioPlayer({ src, className = "" }) {
         )}
       </button>
 
-      <div className="flex min-w-0 flex-1 items-center gap-2">
+      <div className="flex min-w-0 w-full flex-1 basis-[min(100%,12rem)] items-center gap-2 sm:basis-auto">
         <div
           className="flex h-7 shrink-0 items-end gap-px opacity-80"
           aria-hidden="true"
@@ -129,7 +129,7 @@ export function VoiceAudioPlayer({ src, className = "" }) {
         </button>
       </div>
 
-      <span className="shrink-0 tabular-nums text-[12px] text-clinical-muted">
+      <span className="ml-auto shrink-0 tabular-nums text-[11px] text-clinical-muted sm:ml-0 sm:text-[12px]">
         {formatPlaybackTime(currentTime)} / {formatPlaybackTime(duration)}
       </span>
     </div>

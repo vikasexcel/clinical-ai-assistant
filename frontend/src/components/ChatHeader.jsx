@@ -1,8 +1,8 @@
 export function ChatHeader({ onNewChat, disableNewChat }) {
   return (
-    <header className="sticky top-0 z-30 shrink-0 border-b border-clinical-border-soft bg-clinical-surface/90 backdrop-blur-md">
-      <div className="flex w-full items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
-        <div className="flex min-w-0 items-center gap-3">
+    <header className="sticky top-0 z-30 shrink-0 border-b border-clinical-border-soft bg-clinical-surface/90 pt-[env(safe-area-inset-top,0px)] backdrop-blur-md">
+      <div className="flex w-full items-center justify-between gap-2 px-3 py-3 sm:gap-4 sm:px-6 sm:py-3.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
           <span
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-clinical-border-soft bg-clinical-elevated shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]"
             aria-hidden="true"
@@ -14,21 +14,23 @@ export function ChatHeader({ onNewChat, disableNewChat }) {
             </svg>
           </span>
           <div className="min-w-0">
-            <p className="font-display text-[1.05rem] font-semibold tracking-tight text-clinical-ink sm:text-lg">
+            <p className="truncate font-display text-[1.02rem] font-semibold tracking-tight text-clinical-ink sm:text-[1.05rem] sm:text-lg">
               MedClaim AI
             </p>
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-clinical-muted">
+            <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-clinical-muted sm:text-[11px] sm:tracking-[0.14em]">
               Documentation workspace
             </p>
           </div>
         </div>
         <button
-          className="shrink-0 rounded-lg border border-transparent px-3 py-2 text-[13px] font-medium text-clinical-muted transition hover:border-clinical-border-soft hover:bg-clinical-elevated hover:text-clinical-ink disabled:cursor-not-allowed disabled:opacity-40"
+          className="shrink-0 rounded-lg border border-transparent px-2.5 py-2 text-[12px] font-medium text-clinical-muted transition hover:border-clinical-border-soft hover:bg-clinical-elevated hover:text-clinical-ink disabled:cursor-not-allowed disabled:opacity-40 sm:px-3 sm:text-[13px]"
+          aria-label="Clear workspace"
           disabled={disableNewChat}
           onClick={onNewChat}
           type="button"
         >
-          Clear workspace
+          <span className="sm:hidden">Clear</span>
+          <span className="hidden sm:inline">Clear workspace</span>
         </button>
       </div>
     </header>

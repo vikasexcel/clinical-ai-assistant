@@ -31,20 +31,20 @@ export function ChatComposer({
   };
 
   return (
-    <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-5">
+    <div className="px-3 pb-[max(1rem,env(safe-area-inset-bottom))] pt-2 sm:px-5">
       <form className="flex flex-col gap-3" onSubmit={onSubmit}>
         <div className="flex flex-col gap-3 rounded-xl border border-clinical-border bg-clinical-elevated/80 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] sm:px-4">
-          <div className="flex items-baseline justify-between gap-2">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
             <label className="text-[12px] font-semibold uppercase tracking-[0.08em] text-clinical-muted" htmlFor="clinical-draft">
               Narrative &amp; context
             </label>
-            <span className="text-[11px] text-clinical-muted/90">Free text · Shift+Enter for newline</span>
+            <span className="text-[11px] text-clinical-muted/90 sm:text-right">Free text · Shift+Enter for newline</span>
           </div>
           <textarea
             id="clinical-draft"
             name="clinicalDraft"
             autoComplete="off"
-            className="min-h-[140px] w-full resize-y rounded-lg border border-clinical-border-soft bg-clinical-surface px-3 py-2.5 text-[15px] leading-relaxed text-clinical-ink placeholder:text-clinical-muted/75 outline-none ring-0 focus:border-clinical-line/50 focus:ring-2 focus:ring-clinical-accent/15 sm:min-h-[180px]"
+            className="min-h-[120px] w-full resize-y rounded-lg border border-clinical-border-soft bg-clinical-surface px-3 py-2.5 text-[15px] leading-relaxed text-clinical-ink placeholder:text-clinical-muted/75 outline-none ring-0 focus:border-clinical-line/50 focus:ring-2 focus:ring-clinical-accent/15 sm:min-h-[160px] md:min-h-[180px]"
             onChange={onTextChange}
             placeholder="Chief complaint, interval history, exam findings, or rough bullets…"
             rows={6}
@@ -100,8 +100,8 @@ export function ChatComposer({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-clinical-border-soft pt-3">
-            <div className="flex flex-wrap items-center gap-1">
+          <div className="flex flex-col gap-3 border-t border-clinical-border-soft pt-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-1 gap-y-1">
               <label className="cursor-pointer rounded-md px-2 py-1.5 text-[13px] text-clinical-muted transition hover:bg-clinical-surface hover:text-clinical-ink">
                 <span className="sr-only">Attach image</span>
                 <span aria-hidden="true">Image</span>
@@ -146,9 +146,9 @@ export function ChatComposer({
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
               <button
-                className="rounded-md px-2 py-1.5 text-[13px] text-clinical-muted transition hover:bg-clinical-surface hover:text-clinical-ink disabled:cursor-not-allowed disabled:opacity-40"
+                className="order-2 rounded-md px-2 py-2 text-[13px] text-clinical-muted transition hover:bg-clinical-surface hover:text-clinical-ink disabled:cursor-not-allowed disabled:opacity-40 sm:order-1 sm:py-1.5"
                 disabled={isSubmitting}
                 onClick={onReset}
                 type="button"
@@ -156,7 +156,7 @@ export function ChatComposer({
                 Reset
               </button>
               <button
-                className={`rounded-lg px-4 py-2.5 text-[13px] font-semibold shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-clinical-accent/40 focus-visible:ring-offset-2 ${
+                className={`order-1 w-full rounded-lg px-4 py-3 text-[13px] font-semibold shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-clinical-accent/40 focus-visible:ring-offset-2 sm:order-2 sm:w-auto sm:py-2.5 ${
                   isSubmitting
                     ? "cursor-wait bg-clinical-accent-hover text-clinical-on-accent"
                     : !canSubmit

@@ -34,7 +34,8 @@ function OutputEmptyState() {
         Billing guidance, structured chart sections, and ICD context will render in this pane—similar to a chart preview in an EHR, not a message feed.
       </p>
       <p className="mt-6 text-[12px] font-medium uppercase tracking-[0.1em] text-clinical-muted/80">
-        Complete intake on the left, then generate
+        <span className="lg:hidden">Complete intake above, then generate</span>
+        <span className="hidden lg:inline">Complete intake on the left, then generate</span>
       </p>
     </div>
   );
@@ -51,7 +52,7 @@ export function ChatThread({ messages }) {
   if (pairs.length === 0) {
     return (
       <div className="h-full min-h-[12rem]">
-        <div className="border-b border-clinical-border-soft px-4 py-4 sm:px-6">
+        <div className="border-b border-clinical-border-soft px-3 py-3 sm:px-6 sm:py-4">
           <h2 className="font-display text-[1.1rem] font-semibold text-clinical-ink">Output</h2>
           <p className="mt-1 text-[13px] text-clinical-muted">Structured documentation and coding support</p>
         </div>
@@ -62,16 +63,16 @@ export function ChatThread({ messages }) {
 
   return (
     <div className="pb-10">
-      <div className="sticky top-0 z-10 border-b border-clinical-border-soft bg-clinical-bg/95 px-4 py-4 backdrop-blur-sm sm:px-6">
+      <div className="sticky top-0 z-10 border-b border-clinical-border-soft bg-clinical-bg/95 px-3 py-3 backdrop-blur-sm sm:px-6 sm:py-4">
         <h2 className="font-display text-[1.1rem] font-semibold text-clinical-ink">Output</h2>
         <p className="mt-1 text-[13px] text-clinical-muted">Review each run below before saving to the chart</p>
       </div>
 
-      <div className="space-y-8 px-4 pt-6 sm:space-y-10 sm:px-6">
+      <div className="space-y-6 px-3 pt-4 sm:space-y-10 sm:px-6 sm:pt-6">
         {pairs.map(({ user, assistant }, index) => (
           <section
             key={user.id}
-            className="rounded-2xl border border-clinical-border bg-clinical-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.9),0_12px_40px_rgba(22,25,23,0.06)] sm:p-6"
+            className="rounded-2xl border border-clinical-border bg-clinical-surface p-3 shadow-[0_1px_0_rgba(255,255,255,0.9),0_12px_40px_rgba(22,25,23,0.06)] sm:p-6"
             aria-labelledby={`encounter-${user.id}-title`}
           >
             <div className="mb-5 flex flex-wrap items-end justify-between gap-2 border-b border-clinical-border-soft pb-4">

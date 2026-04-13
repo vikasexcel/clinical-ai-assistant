@@ -119,13 +119,13 @@ export default function App() {
         Skip to main content
       </a>
 
-      <div className="flex h-svh max-h-svh min-h-0 flex-col overflow-hidden bg-transparent">
+      <div className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-transparent">
         <ChatHeader disableNewChat={isSubmitting} onNewChat={handleClearChat} />
 
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
           {/* Left: encounter intake (form workspace — not a chat composer dock) */}
-          <aside className="flex min-h-0 shrink-0 flex-col border-clinical-border-soft bg-clinical-surface/90 lg:w-[min(100%,26rem)] lg:border-r lg:pt-0">
-            <div className="border-b border-clinical-border-soft px-4 py-4 sm:px-5 lg:border-b-0 lg:pt-5">
+          <aside className="flex max-h-[min(52svh,28rem)] min-h-0 shrink-0 flex-col overflow-hidden border-b border-clinical-border-soft bg-clinical-surface/90 lg:max-h-none lg:w-[min(100%,26rem)] lg:shrink-0 lg:border-b-0 lg:border-r lg:pt-0">
+            <div className="shrink-0 border-b border-clinical-border-soft px-4 py-3 sm:px-5 sm:py-4 lg:border-b-0 lg:pt-5">
               <h2 className="font-display text-[1.15rem] font-semibold tracking-tight text-clinical-ink">
                 Encounter intake
               </h2>
@@ -153,7 +153,7 @@ export default function App() {
             className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-clinical-bg/40"
           >
             {activeStatusMessage ? (
-              <div className="shrink-0 border-b border-clinical-border-soft bg-clinical-surface/60 px-4 py-3 sm:px-6">
+              <div className="shrink-0 border-b border-clinical-border-soft bg-clinical-surface/60 px-3 py-2.5 sm:px-6 sm:py-3">
                 <StatusBanner message={activeStatusMessage} tone={recorder.error ? "error" : statusTone} />
               </div>
             ) : null}

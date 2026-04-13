@@ -66,7 +66,7 @@ function IntakeRecord({ text, imageFileName, hasAudio, audioDurationLabel, audio
 
   return (
     <article className="min-w-0" aria-label="Source intake">
-      <div className="rounded-lg border border-slate-200 bg-slate-50/90 px-4 py-3 text-[15px] leading-relaxed text-slate-900">
+      <div className="break-words rounded-lg border border-slate-200 bg-slate-50/90 px-3 py-3 text-[15px] leading-relaxed text-slate-900 sm:px-4">
         {meta.length > 0 ? (
           <p className="mb-2 border-b border-slate-200/80 pb-2 font-mono text-[12px] text-slate-600">{meta.join(" · ")}</p>
         ) : null}

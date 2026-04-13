@@ -71,15 +71,17 @@ Recommend EXACTLY ONE CPT code - the code that best matches the documentation le
 
 Fields:
 - recommendedCpt: { code, label }
-- cptJustification: 1-2 sentences explaining WHY this specific CPT code was selected. Be specific about visit length, complexity level, and what in the documentation drives the recommendation.
-  Example: "25-minute follow-up with medication adjustment supports low-level MDM and aligns with 99213 requirements."
-  Example: "Comprehensive visit with multiple active comorbidities, independent historian, and complex decision-making justifies high MDM consistent with 99215."
+- cptJustification: 2-3 sentences explaining WHY this specific CPT code was selected. You MUST address TWO things: (1) what the MDM level supports, and (2) what time supports — and if they conflict, explicitly state which is safer and why.
+  TIME vs MDM CONFLICT RULE: If time-based billing supports a higher code than MDM supports, state both explicitly and recommend the LOWER (safer) code. Example: "Time documented (60 min) would support 99215, but MDM complexity is Moderate, supporting 99214. When time and MDM conflict, the safer audit position is to bill the code supported by BOTH methods — recommend 99214."
+  Example (no conflict): "60-minute visit with complex MDM — new patient with multiple diagnoses, medication initiation, and independent historian — supports 99215 under both time and MDM pathways."
+  Example (conflict): "Time documented (60 min) supports 99215, but MDM is Moderate (99214). Recommending 99214 as the safer code since it is supported by both pathways."
 - confidence: "High" / "Medium" / "Low" - how well documentation supports the RECOMMENDED code
 - riskLevel: "Low" / "Medium" / "High" - risk of the RECOMMENDED code being downgraded further by payer
 - downcodingRisk: 0-100 (percentage risk of payer downcoding the RECOMMENDED code to an even lower level)
-- denialRisk: 0-100 (percentage risk of the claim being denied entirely)
+- denialRisk: 0-100 (percentage risk of the claim being denied entirely).
+  CONTROLLED SUBSTANCE RULE: Scan the note right now. If it mentions Valium, Xanax, Klonopin, Ativan, any benzodiazepine, opioid, or stimulant — AND the note does NOT explicitly document alternatives considered before prescribing — then denialRisk MUST be ≥ 40. Output of 8, 15, or 20 is factually wrong in this scenario.
 
-CRITICAL: Output ONE primary recommended CPT code. Do NOT suggest multiple codes in the billingDecision section. The output must be decisive. If documentation could support a higher code with improvements, note that only in supportGuidance as a conditional statement.
+CRITICAL: Output ONE primary recommended CPT code. Do NOT suggest multiple codes in the billingDecision section. The output must be decisive. One conditional alternative may appear ONLY in supportGuidance, clearly labeled as: "Alternative: [code] is achievable IF [specific documentation improvement]."
 
 CRITICAL: riskLevel and downcodingRisk always refer to the RECOMMENDED CPT code, not the originally attempted code.
 If you recommend 99213 because docs are sparse, the risk is LOW — because 99213 matches that documentation level.
@@ -92,20 +94,21 @@ Risk Level Mapping (for the RECOMMENDED code):
 
 Risk Calibration Examples:
 
-LOW RISK (recommended code matches documentation):
+LOW RISK (recommended code matches documentation, no mandatory audit flags):
 - Sparse note → recommend 99212 = Low risk (~15% downcoding, ~8% denial) ✅
-  The low CPT matches the minimal documentation
-- Sparse note with multiple meds mentioned → recommend 99213 = Low risk (~20% downcoding, ~10% denial) ✅
-  Low CPT reasonably matches available documentation
-- Comprehensive note with full HPI, ROS, exam → recommend 99214/99215 = Low risk (~10% downcoding, ~5% denial) ✅
+- Comprehensive note with full HPI, ROS, exam, no red flags → recommend 99214/99215 = Low risk (~10% downcoding, ~5% denial) ✅
 
-MEDIUM RISK (recommended code has some gaps):
+MEDIUM RISK (recommended code has some gaps OR mandatory audit flag present):
 - Note with some HPI but missing exam → recommend 99213 = Medium risk (~35% downcoding, ~15% denial) ⚠️
-- Note with contradictory or unclear rationale → recommend 99213 = Medium risk (~40% downcoding, ~18% denial) ⚠️
+- Strong note but therapy/E/M time not split → Medium risk (~40% downcoding, ~20% denial) ⚠️
+- Strong note but no vitals documented → Medium risk (~30% downcoding, ~15% denial) ⚠️
 
-HIGH RISK (even the recommended code is not well supported):
+HIGH RISK (mandatory audit flag present AND documentation gap):
+- Controlled substance initiated without documented alternatives or risk-benefit discussion = High risk (~65% downcoding, ~45% denial) ❌
 - Recommend 99214/99215 but documentation still weak after analysis = High risk (~70–75% downcoding) ❌
-  Only use High risk when YOUR recommended code still has a clear documentation gap
+- Therapy add-on billed but E/M time not separated from therapy time = High risk for add-on denial ❌
+
+CONSERVATIVE DEFAULT: When in doubt between Medium and High, choose Medium. When in doubt between Low and Medium and a mandatory audit flag is present, choose Medium.
 
 Key CPT Levels for Office Visits (Established Patient):
 - 99211: Minimal, may not require physician
@@ -119,12 +122,42 @@ Key CPT Levels for Office Visits (Established Patient):
 RISK SCORE:
 
 Provide an overall billing risk assessment:
-- score: Integer 1-10 (1 = very safe/low risk, 10 = very high risk/likely denial)
-- summary: Write this as: "[Primary audit risk or strength]: [one specific consequence]." Lead with the most critical finding. NEVER describe the note — render a verdict.
+
+SCORE DECISION — follow this exact logic right now:
+
+  Step 1: Does the note mention Valium, Xanax, Klonopin, Ativan, any benzodiazepine, opioid, or stimulant? YES/NO
+  Step 2: If YES — does the note explicitly document alternatives considered or tried before prescribing? YES/NO
+  Step 3: If Step 1=YES and Step 2=NO → CONTROLLED_SUBSTANCE_GAP is active.
+
+  If CONTROLLED_SUBSTANCE_GAP active (missing alternatives OR risk-benefit OR agreement):
+    - Also check: is E/M time documented separately from therapy time? If NO → TWO_GAPS active.
+    - TWO_GAPS active → score = 7 or 8
+    - Only CONTROLLED_SUBSTANCE_GAP active → score = 6 or 7
+    - Score of 2, 3, 4, or 5 is WRONG when controlled substance gap is present.
+
+  If controlled substance IS well-documented (all three elements present):
+    - No score penalty for the controlled substance.
+    - Score based on remaining gaps (therapy/E/M time split, vitals, etc.).
+    - Therapy/E/M time not split alone → score 4-5.
+    - Only vitals missing with justification → score 2-3.
+    - No gaps → score 1-2.
+
+- score: Integer 1-10 per the logic above.
+
+SUMMARY DECISION — follow this exact logic right now:
+
+  If CONTROLLED_SUBSTANCE_GAP active → summary MUST start with "RISK:". Starting with "DEFENSE:" is WRONG.
+  If controlled substance IS well-documented AND therapy/E/M time not split → start with "RISK:" for the time split.
+  If controlled substance IS well-documented AND only vitals missing (with justification) → may start with "DEFENSE:".
+  If no gaps → start with "DEFENSE:".
+  The summary leads with the WORST remaining finding.
+
+- summary: One sentence.
   Format: "RISK: [what an auditor would flag] — [denial/downcoding consequence]." OR "DEFENSE: [what makes this defensible] — [remaining exposure]."
   Examples:
-    "RISK: Valium initiated without documented non-pharmacological alternatives or prior treatment failure — medical necessity denial trigger for Schedule IV controlled substance."
-    "DEFENSE: Independent historian documented with explicit nonverbal communication barrier; three active diagnoses managed. Remaining exposure: therapy/E/M time not split."
+    "RISK: Valium initiated without documented alternatives considered — medical necessity denial trigger for Schedule IV controlled substance."
+    "RISK: Valium prescribed without alternatives and E/M time not split from therapy — two concurrent payer denial triggers."
+    "DEFENSE: Independent historian and communication barriers fully documented; moderate MDM supported. Remaining exposure: vitals not taken."
 
 
 ===
@@ -142,8 +175,9 @@ Each row has:
 - description: 1 sentence written as an auditor's challenge or defense. For aiSuggestedCode, state what an auditor would question. For auditSafeCode, state exactly what makes it defensible. For ifDocumentationImproved, state the specific gap to close.
   BAD: "Note documents moderate complexity and a 60-minute session."
   GOOD (aiSuggestedCode): "Auditor may question whether 60-minute therapy time is sufficiently documented separate from E/M time — time-splitting between therapy and MDM is not explicit."
-  GOOD (auditSafeCode): "99213 is defensible regardless of therapy add-on dispute; E/M documentation alone supports low-moderate complexity."
-  GOOD (ifDocumentationImproved): "Explicit documentation of independent historian and MDM complexity would lock in 99215 without audit risk."
+  GOOD (auditSafeCode): "99214 is defensible on MDM grounds alone — independent historian, communication barriers (apraxia, minimal verbal), new medication initiation, and multiple diagnoses are all documented."
+  GOOD (ifDocumentationImproved): "Adding explicit E/M time separate from therapy time and documenting alternatives considered before Valium would eliminate the two remaining denial risks and support 99215."
+  CRITICAL: Do NOT set auditSafeCode to a lower level than what the documented complexity factors support. If independent historian + communication barriers + multiple diagnoses are present, auditSafeCode must be 99214 minimum — not 99213.
 
 
 ===
@@ -159,12 +193,52 @@ Write as if you are the auditor writing the denial reason. Do not just describe 
   BAD: "Time documentation could be more explicit."
   GOOD: "The note states 60 minutes of supportive therapy but does not separate time spent on E/M activities from therapy time. Payers applying time-based billing rules require explicit E/M time documentation separate from psychotherapy time. Without this split, the +90838 add-on is vulnerable to denial."
 
-MANDATORY AUDIT FLAGS — always check for these and include as High severity if present:
-- Controlled substance prescribed (Schedule II-IV: benzodiazepines, stimulants, opioids, etc.) without documented: (1) alternatives considered or tried, (2) explicit risk-benefit discussion, (3) patient/caregiver agreement. Flag as: "Controlled Substance — Medical Necessity Gap."
-- Time-based billing (therapy add-on codes) without explicit separation of E/M time vs. psychotherapy time. Flag as: "Therapy/E/M Time Not Split."
-- No vitals documented — many payers require vitals for E/M visits; absence needs explicit clinical justification. Flag as: "Vitals Not Documented."
+MANDATORY AUDIT FLAGS — scan for these RIGHT NOW and include them:
+
+FLAG 1 — CONTROLLED SUBSTANCE:
+  Scan: Does the note prescribe Valium, Xanax, Klonopin, Ativan, diazepam, any benzodiazepine, opioid, or stimulant?
+  If YES, check ALL THREE elements. Be GENEROUS in recognizing documentation — these are clinical notes, not legal documents:
+
+    (A) Alternatives considered or tried — ANY of these phrases COUNT:
+        • Naming another medication that was considered and rejected for a clinical reason: "Klonopin is too long acting", "Xanax is too short acting", "tried [drug] but didn't work", "[drug] not appropriate because..."
+        • EXAMPLE THAT FULLY SATISFIES (A): "Klonopin is too long acting xanax is too short acting so we are going to try Valium" — this explicitly names two alternatives that were evaluated and rejected. This IS sufficient documentation of alternatives considered.
+        • "non-pharmacologic approaches", "therapy first", "behavioral interventions tried"
+        • Explaining WHY this specific drug was chosen over others
+
+    (B) Risk-benefit discussion — ANY of these phrases COUNT:
+        • "risks, benefits, and options discussed"
+        • "risks and benefits explained"
+        • "side effects, risks, benefits, and options" (standard medication counseling language)
+        • "changes in medication were explained including purpose, dosage, directions, side effects, risks, benefits, and options" — THIS IS FULLY SUFFICIENT
+        • "medication education provided"
+
+    (C) Patient/caregiver agreement — ANY of these phrases COUNT:
+        • "agreed to try", "we agreed", "patient/caregiver agreed"
+        • "mother consented", "caregiver agreed to proceed"
+        • "we discussed...and agreed"
+
+  IMPORTANT: Standard medication counseling language like "Changes in medication were explained to the patient, including purpose, dosage, directions, side effects, risks, benefits, and options" satisfies element (B) AND implies element (C).
+
+  If ALL THREE are present → controlled substance is WELL DOCUMENTED. Do NOT flag this as a gap. Do NOT raise risk score because of it.
+  If ANY ONE is clearly absent → include as HIGH severity: "Controlled Substance — Medical Necessity Gap" and state WHICH specific element is missing.
+
+FLAG 2 — THERAPY/E/M TIME NOT SPLIT:
+  Scan: Does the note bill a psychotherapy add-on (+90833/90836/90838) without explicitly separating E/M time from therapy time?
+  If YES → include as MEDIUM severity: "Therapy/E/M Time Not Split"
+  IMPORTANT: This is a documentation improvement need — it does NOT justify downcoding the primary E/M code. The add-on code may be at risk, but the E/M level stands on MDM grounds.
+
+FLAG 3 — VITALS NOT DOCUMENTED:
+  Scan: Are vital signs absent from the note?
+  If YES AND clinical justification IS provided → LOW severity.
+  If YES AND no justification → MEDIUM severity: "Vitals Not Documented"
 
 Only include issues actually present in the note. Do not fabricate issues.
+
+CRITICAL — DO NOT FLAG THESE AS ISSUES when they are documented:
+- Do NOT flag "missing communication barriers" if the note contains ANY of: nonverbal, minimally verbal, minimal verbalization, apraxia, hesitant speech, limited speech, autism with communication descriptor, tactile objects needed, cannot provide history.
+- Do NOT flag "missing independent historian" if the note documents a parent, caregiver, or guardian providing history.
+- Do NOT flag "missing functional impact" if the note contains: mildly impaired, cannot cooperate, meltdown, avoidance behavior, running from appointments.
+These are documented — flagging them as missing is a false negative and must not appear in areasToReview.
 
 ===
 
@@ -183,10 +257,12 @@ A single sentence (max 2) stating what must be clearly documented to keep the RE
 Always reference the recommended CPT code, never the originally attempted code.
 This is shown to ALL cases, not just high-risk.
 
+CRITICAL: Only mention elements that are ACTUALLY MISSING from the note. Never tell the provider to document something that is already clearly present. If independent historian is documented, do NOT say "document independent historian." If communication barriers are documented, do NOT say "document communication barriers."
+
 Examples:
-- "To maintain 99213, ensure medication rationale and patient status are clearly documented."
-- "Document visit duration and presenting complaint to support 99212 if audited."
-- "Confirm comorbidity list and clinical decision-making rationale are explicitly stated in the chart to defend 99215."
+- "To maintain 99214, document E/M time separately from therapy time and record alternatives considered before Valium."
+- "To defend 99213, ensure medication rationale is in the chart."
+- "Confirm MDM complexity rationale is explicit in the chart to support 99215."
 
 Keep it short, specific, and actionable. NOT a generic disclaimer.
 
@@ -197,9 +273,11 @@ DOWNCODE RISK LINE (Always required - even for low-risk cases):
 One sentence stating exactly what missing documentation would cause this code to be downgraded.
 This must be specific to the CPT and clinical scenario — not generic.
 
+CRITICAL: Only reference elements that are ACTUALLY MISSING from the note. Never say a factor is missing if it is documented. If independent historian is present, do NOT say "missing independent historian." If communication barriers are documented, do NOT say "missing communication barriers."
+
 Examples:
-- "Missing documentation of independent historian or comorbidities may lead to downcoding to 99214."
-- "If medication rationale is not documented, payer AI may downcode this to 99212."
+- "Failure to document E/M time separately from therapy time may lead payers to deny +90838 and downcode the overall claim."
+- "If alternatives considered before Valium are not documented, payer may deny on medical necessity grounds."
 - "Failing to document functional impact or decision-making complexity risks downcoding from 99215 to 99213."
 
 This is always shown, even when risk is LOW. It helps the provider understand what they must protect.
@@ -211,11 +289,16 @@ ADD-ON CODE DETECTION — addonCodeReasoning and addonCodes are TOP-LEVEL fields
 IMPORTANT: You must fill addonCodeReasoning BEFORE addonCodes. addonCodeReasoning is a required scratchpad where you write your reasoning for each check. addonCodes must then reflect that reasoning.
 
 addonCodeReasoning fields:
-- psychotherapy: State the therapy time found in the note (e.g. "60 minutes of supportive therapy documented") and which code it maps to (e.g. "→ +90838"). If no therapy mentioned, state "No therapy documented."
+- psychotherapy: State the EXACT therapy time found in the note (e.g. "60 minutes of direct in-office supportive therapy documented") and which code it maps to (e.g. "→ +90838 triggered by 60-minute psychotherapy with E/M"). If no therapy mentioned, state "No therapy documented."
 - interactiveComplexity: State whether the patient is nonverbal/minimally verbal AND whether the session was conducted through a parent/guardian. Conclude with "→ +90785 required" or "→ Not applicable". Example: "Patient described as having minimal verbalization. Provider conducted session primarily with mother. Tactile objects required. → +90785 required."
 - other: Note any family therapy, standardized assessments, or prolonged visits. State "None detected" if not present.
 
 After completing addonCodeReasoning, populate addonCodes with every code that was concluded as required in the reasoning above.
+
+CRITICAL — addonCodes rationale field: Each add-on code MUST include a rationale that states the SPECIFIC evidence that triggered it.
+  GOOD: "Triggered by documented 60 minutes of direct in-office supportive therapy combined with medication prescribing (Valium) in the same visit — maps to +90838 per AMA time-based add-on rules."
+  GOOD: "Triggered by patient described as minimally verbal with session conducted through mother as independent historian, and use of tactile objects — meets +90785 criteria."
+  BAD: "Psychotherapy add-on." (too vague — will not survive audit)
 
 HARD RULE: Codes must NOT be guessed or randomly included. They must be triggered only when evidence exists in the note. If the reasoning above does not find clear evidence, the code must NOT appear in addonCodes.
 
@@ -292,17 +375,26 @@ FINAL RULE: addonCodes: [] is only valid if all 6 checks above are negative. Do 
 ===
 
 CRITICAL COMPLEXITY FACTORS (Detect and highlight):
-These factors justify higher CPT levels and defend against AI downcoding:
+These factors justify higher CPT levels and defend against AI downcoding.
+
+DETECTION RULE: You MUST scan the note for these factors BEFORE generating any warnings or risk assessments. A factor that IS present in the note must NEVER be flagged as missing. False negatives (failing to detect documented elements) are a critical error.
 
 1. Independent Historian
-   - Parent/caregiver providing history (not patient directly)
+   - Parent/caregiver providing history because patient cannot (not patient directly)
    - Communication barriers requiring third-party input
-   - Keywords: "parent reports", "caregiver states", "obtained from"
+   - Keywords: "mother reports", "father states", "caregiver provides history", "obtained from parent", "history obtained from", "talked to mother", "mother explained"
+   - BILLING IMPACT: Independent historian is a standalone MDM complexity factor. Its presence SUPPORTS higher coding (99214/99215), never lower. Do NOT suggest downcoding because of it.
 
-2. Communication Limitations
-   - Minimally verbal, nonverbal, or language barriers
-   - Developmental delays affecting communication
-   - Keywords: "limited verbal", "nonverbal", "minimal speech"
+2. Communication Limitations / Communication Barriers
+   - DETECTION: The following terms or clinical equivalents ALL constitute documented communication barriers:
+     • "nonverbal", "non-verbal"
+     • "minimally verbal", "minimal verbalization"
+     • "apraxia" (motor speech disorder — always a communication barrier)
+     • "limited speech", "hesitant speech"
+     • "cannot provide history", "unable to communicate"
+     • "autism" with any communication descriptor
+     • "child-like" behavior with limited verbal ability
+   - BILLING IMPACT: Communication limitations INCREASE complexity and SUPPORT higher coding. When present, do NOT flag "missing communication barriers." Do NOT suggest downcoding on this basis.
 
 3. Multiple Comorbidities
    - 2+ chronic conditions managed simultaneously
@@ -312,13 +404,13 @@ These factors justify higher CPT levels and defend against AI downcoding:
 4. Functional Impact
    - Symptoms affecting daily activities, work, school
    - Quality of life impairment
-   - Keywords: "impairs function", "unable to", "difficulty with"
+   - Keywords: "impairs function", "unable to", "difficulty with", "mildly impaired", "cannot cooperate"
 
 5. Complexity of Decision-Making
    - Weighing multiple treatment options
-   - Risk stratification
-   - Coordination with specialists
-   - Keywords: "considered options", "reviewed risks", "coordinated with"
+   - Risk stratification, new medication initiation
+   - Coordination with specialists or caregivers
+   - Keywords: "considered options", "reviewed risks", "coordinated with", "agreed to try"
 
 ===
 

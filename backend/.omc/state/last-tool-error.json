@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"pkill -f \\\"node.*backend\\\" 2>/dev/null; sleep 1; node src/index.js &\\nsleep 2 && curl -s http://localhost:3001/health 2>/dev/null || echo \\\"checking...\\\"\",\"description\":\"Restart backend se...",
+  "error": "Exit code 144\n[rerun: b4]",
+  "timestamp": "2026-04-13T12:18:10.969Z",
+  "retry_count": 1
+}

@@ -14,7 +14,7 @@ export function StatusBanner({ tone = "info", message }) {
       className={`rounded-xl border px-3.5 py-2.5 text-[13px] leading-snug shadow-sm ${toneClasses[tone] ?? toneClasses.info}`}
       aria-live="polite"
     >
-      <p>{message}</p>
+      <p className="break-words">{message}</p>
     </div>
   );
 }
