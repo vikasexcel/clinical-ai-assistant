@@ -56,6 +56,7 @@ function StructuredResultComponent({ result }) {
     structuredNote,
     smartWarning,
     icd10,
+    addonCodes,
     inputSummary,
   } = result;
 
@@ -143,13 +144,13 @@ function StructuredResultComponent({ result }) {
         )}
 
         {/* ── Add-on Codes ── */}
-        {billingDecision?.addonCodes?.length > 0 && (
+        {addonCodes?.length > 0 && (
           <Section title="Add-on Codes">
             <ul className="m-0 space-y-2 pl-0">
-              {billingDecision.addonCodes.map((addon) => (
+              {addonCodes.map((addon) => (
                 <li key={addon.code} className="flex items-start gap-3 rounded-lg border border-indigo-200 bg-indigo-50/70 px-3 py-2.5">
                   <span className="mt-0.5 inline-block rounded bg-indigo-100 px-2 py-0.5 font-mono text-[12px] font-semibold text-indigo-900 ring-1 ring-indigo-200 whitespace-nowrap">
-                    +{addon.code}
+                    +{addon.code.replace(/^\+/, "")}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-medium text-indigo-900">{addon.label}</p>

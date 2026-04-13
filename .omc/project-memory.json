@@ -84,20 +84,20 @@
   "hotPaths": [
     {
       "path": "backend/src/prompts/clinicalAssistantPrompt.js",
-      "accessCount": 13,
-      "lastAccessed": 1776064632109,
+      "accessCount": 22,
+      "lastAccessed": 1776074012494,
       "type": "file"
     },
     {
       "path": "backend/src/schemas/clinicalOutput.js",
-      "accessCount": 10,
-      "lastAccessed": 1776064606624,
+      "accessCount": 13,
+      "lastAccessed": 1776073697661,
       "type": "file"
     },
     {
       "path": "frontend/src/components/StructuredResult.jsx",
-      "accessCount": 6,
-      "lastAccessed": 1776064864926,
+      "accessCount": 11,
+      "lastAccessed": 1776076468896,
       "type": "file"
     },
     {

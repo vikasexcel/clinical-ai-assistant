@@ -9,15 +9,6 @@ export const clinicalAssistantInsightsSchema = z.object({
       code: z.string().min(1),
       label: z.string().min(1),
     }),
-    addonCodes: z
-      .array(
-        z.object({
-          code: z.string().min(1),
-          label: z.string().min(1),
-          rationale: z.string().min(1),
-        }),
-      )
-      .default([]),
     cptJustification: z.string().min(1),
     confidence: confidenceLevelSchema,
     riskLevel: riskLevelSchema,
@@ -145,6 +136,20 @@ export const clinicalAssistantInsightsSchema = z.object({
         }),
       ),
   }),
+  addonCodeReasoning: z.object({
+    psychotherapy: z.string().min(1),
+    interactiveComplexity: z.string().min(1),
+    other: z.string().min(1),
+  }),
+  addonCodes: z
+    .array(
+      z.object({
+        code: z.string().min(1),
+        label: z.string().min(1),
+        rationale: z.string().min(1),
+      }),
+    )
+    .default([]),
 });
 
 export const clinicalAnalysisResponseSchema = z.object({
@@ -169,4 +174,6 @@ export const clinicalAnalysisResponseSchema = z.object({
   structuredNote: clinicalAssistantInsightsSchema.shape.structuredNote,
   smartWarning: clinicalAssistantInsightsSchema.shape.smartWarning,
   icd10: clinicalAssistantInsightsSchema.shape.icd10,
+  addonCodeReasoning: clinicalAssistantInsightsSchema.shape.addonCodeReasoning,
+  addonCodes: clinicalAssistantInsightsSchema.shape.addonCodes,
 });

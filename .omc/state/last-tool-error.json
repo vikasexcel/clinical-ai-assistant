@@ -1,7 +1,7 @@
 {
   "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"pkill -f \\\"node.*backend\\\" 2>/dev/null; true\",\"description\":\"Kill any existing backend processes\"}",
-  "error": "Exit code 144\n[rerun: b6]",
-  "timestamp": "2026-04-13T07:17:21.129Z",
-  "retry_count": 3
+  "tool_input_preview": "{\"command\":\"curl -s -X POST http://localhost:3022/api/assistant/analyze \\\\\\n  -H \\\"Content-Type: application/json\\\" \\\\\\n  -d '{\\n    \\\"text\\\": \\\"Presenting Problem:\\\\nAUTISTIC, ANXIETY AND CLAUSTROPHO...",
+  "error": "Exit code 127\n/bin/bash: line 19: jq: command not found\n[rerun: b3]",
+  "timestamp": "2026-04-13T09:50:01.534Z",
+  "retry_count": 1
 }
