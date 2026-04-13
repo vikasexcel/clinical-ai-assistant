@@ -84,8 +84,8 @@
   "hotPaths": [
     {
       "path": "backend/src/prompts/clinicalAssistantPrompt.js",
-      "accessCount": 32,
-      "lastAccessed": 1776085316380,
+      "accessCount": 42,
+      "lastAccessed": 1776093686703,
       "type": "file"
     },
     {
