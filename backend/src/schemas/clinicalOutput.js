@@ -9,12 +9,62 @@ export const clinicalAssistantInsightsSchema = z.object({
       code: z.string().min(1),
       label: z.string().min(1),
     }),
+    addonCodes: z
+      .array(
+        z.object({
+          code: z.string().min(1),
+          label: z.string().min(1),
+          rationale: z.string().min(1),
+        }),
+      )
+      .default([]),
     cptJustification: z.string().min(1),
     confidence: confidenceLevelSchema,
     riskLevel: riskLevelSchema,
     downcodingRisk: z.number().min(0).max(100),
     denialRisk: z.number().min(0).max(100),
   }),
+  riskScore: z.object({
+    score: z.number().min(1).max(10),
+    summary: z.string().min(1),
+  }),
+  codeRecommendation: z.object({
+    aiSuggestedCode: z.object({
+      code: z.string().min(1),
+      label: z.string().min(1),
+      description: z.string().min(1),
+    }),
+    auditSafeCode: z.object({
+      code: z.string().min(1),
+      label: z.string().min(1),
+      description: z.string().min(1),
+    }),
+    ifDocumentationImproved: z.object({
+      code: z.string().min(1),
+      label: z.string().min(1),
+      description: z.string().min(1),
+    }),
+  }),
+  areasToReview: z
+    .array(
+      z.object({
+        severity: z.enum(["High", "Medium", "Low"]),
+        title: z.string().min(1),
+        body: z.string().min(1),
+      }),
+    )
+    .min(1)
+    .max(4),
+  suggestedImprovements: z
+    .array(
+      z.object({
+        category: z.string().min(1),
+        difficulty: z.enum(["Easy", "Medium", "Hard"]),
+        description: z.string().min(1),
+      }),
+    )
+    .min(1)
+    .max(4),
   lightDefensiveGuidance: z.string().min(1),
   downcodeRiskLine: z.string().min(1),
   justification: z
@@ -84,15 +134,16 @@ export const clinicalAssistantInsightsSchema = z.object({
     primary: z.object({
       code: z.string().min(1),
       label: z.string().min(1),
+      rationale: z.string().min(1),
     }),
     secondaryCodes: z
       .array(
         z.object({
           code: z.string().min(1),
           label: z.string().min(1),
+          rationale: z.string().min(1),
         }),
-      )
-      .max(2),
+      ),
   }),
 });
 
@@ -106,6 +157,10 @@ export const clinicalAnalysisResponseSchema = z.object({
     warnings: z.array(z.string()),
   }),
   billingDecision: clinicalAssistantInsightsSchema.shape.billingDecision,
+  riskScore: clinicalAssistantInsightsSchema.shape.riskScore,
+  codeRecommendation: clinicalAssistantInsightsSchema.shape.codeRecommendation,
+  areasToReview: clinicalAssistantInsightsSchema.shape.areasToReview,
+  suggestedImprovements: clinicalAssistantInsightsSchema.shape.suggestedImprovements,
   lightDefensiveGuidance: clinicalAssistantInsightsSchema.shape.lightDefensiveGuidance,
   downcodeRiskLine: clinicalAssistantInsightsSchema.shape.downcodeRiskLine,
   justification: clinicalAssistantInsightsSchema.shape.justification,

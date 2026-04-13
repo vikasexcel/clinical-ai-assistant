@@ -1,0 +1,189 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1776063228758,
+  "projectRoot": "/home/node/clinical-ai-assistant",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "backend": {
+      "path": "backend",
+      "purpose": null,
+      "fileCount": 8,
+      "lastAccessed": 1776063228749,
+      "keyFiles": [
+        "eng.traineddata",
+        "package-lock.json",
+        "package.json",
+        "server.js",
+        "skills-lock.json"
+      ]
+    },
+    "frontend": {
+      "path": "frontend",
+      "purpose": null,
+      "fileCount": 11,
+      "lastAccessed": 1776063228752,
+      "keyFiles": [
+        "README.md",
+        "eslint.config.js",
+        "index.html",
+        "package-lock.json",
+        "package.json"
+      ]
+    },
+    "backend/node_modules": {
+      "path": "backend/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1776063228755,
+      "keyFiles": []
+    },
+    "frontend/dist": {
+      "path": "frontend/dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 3,
+      "lastAccessed": 1776063228756,
+      "keyFiles": [
+        "favicon.svg",
+        "icons.svg",
+        "index.html"
+      ]
+    },
+    "frontend/node_modules": {
+      "path": "frontend/node_modules",
+      "purpose": "Dependencies",
+      "fileCount": 1,
+      "lastAccessed": 1776063228756,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "backend/src/prompts/clinicalAssistantPrompt.js",
+      "accessCount": 13,
+      "lastAccessed": 1776064632109,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/schemas/clinicalOutput.js",
+      "accessCount": 10,
+      "lastAccessed": 1776064606624,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/StructuredResult.jsx",
+      "accessCount": 6,
+      "lastAccessed": 1776064864926,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1776063465256,
+      "type": "directory"
+    },
+    {
+      "path": "frontend/src/lib/clinicalSampleScenarios.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063455997,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/services/clinicalAssistant.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063458943,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/services/openaiClient.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063459350,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/routes/assistant.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063459378,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/config.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063461835,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/app.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063461851,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/ChatMessage.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1776063462359,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/lib/api.js",
+      "accessCount": 1,
+      "lastAccessed": 1776063462433,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/App.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1776063465768,
+      "type": "file"
+    },
+    {
+      "path": "backend/src/prompts",
+      "accessCount": 1,
+      "lastAccessed": 1776063469238,
+      "type": "directory"
+    },
+    {
+      "path": "frontend/src/components/ChatComposer.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1776063469533,
+      "type": "file"
+    },
+    {
+      "path": "frontend/src/components/ChatThread.jsx",
+      "accessCount": 1,
+      "lastAccessed": 1776063472190,
+      "type": "file"
+    },
+    {
+      "path": "AGENTS.md",
+      "accessCount": 1,
+      "lastAccessed": 1776063472420,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

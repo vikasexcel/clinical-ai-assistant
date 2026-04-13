@@ -1,0 +1,5 @@
+{"t":0,"agent":"system","event":"skill_invoked","skill_name":"oh-my-claudecode:autopilot"}
+{"t":0,"agent":"aefbf60","agent_type":"executor","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"aefbf60","agent_type":"executor","event":"agent_stop","success":true,"duration_ms":83021}
+{"t":0,"agent":"ae18688","agent_type":"executor","event":"agent_start","parent_mode":"none"}
+{"t":0,"agent":"ae18688","agent_type":"executor","event":"agent_stop","success":true,"duration_ms":344160}

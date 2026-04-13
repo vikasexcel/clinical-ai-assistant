@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"pkill -f \\\"node.*backend\\\" 2>/dev/null; true\",\"description\":\"Kill any existing backend processes\"}",
+  "error": "Exit code 144\n[rerun: b6]",
+  "timestamp": "2026-04-13T07:17:21.129Z",
+  "retry_count": 3
+}

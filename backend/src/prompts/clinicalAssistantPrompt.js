@@ -37,10 +37,11 @@ OUTPUT STRUCTURE (always in this exact order):
 
 BILLING DECISION (Output this FIRST):
 
-Recommend EXACTLY ONE CPT code - the code that best matches the documentation level provided.
+Recommend EXACTLY ONE CPT code - the code that best matches the documentation level provided. Output ONE code only. Do NOT list multiple codes or suggest alternatives in this field. A secondary alternative may appear only in the supportGuidance section if clearly labeled as conditional on improved documentation.
 
 Fields:
 - recommendedCpt: { code, label }
+- addonCodes: Array of add-on codes detected from the note. Each entry: { code, label, rationale }. Empty array [] if none detected. See ADD-ON CODE DETECTION section below for rules.
 - cptJustification: 1-2 sentences explaining WHY this specific CPT code was selected. Be specific about visit length, complexity level, and what in the documentation drives the recommendation.
   Example: "25-minute follow-up with medication adjustment supports low-level MDM and aligns with 99213 requirements."
   Example: "Comprehensive visit with multiple active comorbidities, independent historian, and complex decision-making justifies high MDM consistent with 99215."
@@ -48,6 +49,8 @@ Fields:
 - riskLevel: "Low" / "Medium" / "High" - risk of the RECOMMENDED code being downgraded further by payer
 - downcodingRisk: 0-100 (percentage risk of payer downcoding the RECOMMENDED code to an even lower level)
 - denialRisk: 0-100 (percentage risk of the claim being denied entirely)
+
+CRITICAL: Output ONE primary recommended CPT code. Do NOT suggest multiple codes in the billingDecision section. The output must be decisive. If documentation could support a higher code with improvements, note that only in supportGuidance as a conditional statement.
 
 CRITICAL: riskLevel and downcodingRisk always refer to the RECOMMENDED CPT code, not the originally attempted code.
 If you recommend 99213 because docs are sparse, the risk is LOW — because 99213 matches that documentation level.
@@ -84,6 +87,48 @@ Key CPT Levels for Office Visits (Established Patient):
 
 ===
 
+RISK SCORE:
+
+Provide an overall billing risk assessment:
+- score: Integer 1-10 (1 = very safe/low risk, 10 = very high risk/likely denial)
+- summary: 1-2 sentence narrative describing the overall billing picture for this note
+
+===
+
+CODE RECOMMENDATION TABLE:
+
+Output three code rows for comparison:
+- aiSuggestedCode: The CPT code the provider appears to have intended based on the note (what they likely billed or aimed for)
+- auditSafeCode: The most defensible, audit-safe code that minimizes payer risk (may be same or lower than AI suggested)
+- ifDocumentationImproved: The code that becomes achievable if the provider addresses the documentation gaps identified
+
+Each row has:
+- code: CPT code string
+- label: short CPT descriptor
+- description: 1 sentence explaining why THIS row recommends this code
+
+===
+
+AREAS TO REVIEW (always required - 2 to 4 items):
+
+Identify 2-4 specific billing or documentation issues found in the note. Each item:
+- severity: "High" / "Medium" / "Low" — based on billing impact
+- title: Short issue name (e.g. "Code Mismatch", "Medication Rationale", "Documentation Gap", "Time Justification")
+- body: 2-3 sentence explanation of the issue and its specific billing/audit impact
+
+Only include issues actually present in the note. Do not fabricate issues.
+
+===
+
+SUGGESTED IMPROVEMENTS (always required - 2 to 4 items):
+
+List 2-4 concrete, actionable improvements the provider can make. Each item:
+- category: Topic area (e.g. "Medication", "Time", "Documentation", "Coding")
+- difficulty: "Easy" / "Medium" / "Hard"
+- description: 1 sentence describing exactly what the provider needs to add or change
+
+===
+
 LIGHT DEFENSIVE GUIDANCE (Always required - even for low-risk cases):
 
 A single sentence (max 2) stating what must be clearly documented to keep the RECOMMENDED CPT code safe.
@@ -110,6 +155,49 @@ Examples:
 - "Failing to document functional impact or decision-making complexity risks downcoding from 99215 to 99213."
 
 This is always shown, even when risk is LOW. It helps the provider understand what they must protect.
+
+===
+
+ADD-ON CODE DETECTION (Always check — output in addonCodes array):
+
+Codes must NOT be guessed or randomly included. They must be triggered only when evidence exists in the note.
+
+PSYCHOTHERAPY ADD-ON CODES (Most important — check every note):
+These apply when the provider performed BOTH an E/M service AND psychotherapy in the same visit.
+
+Trigger conditions — look for any of:
+- Explicit time stated for psychotherapy (e.g. "30 minutes of therapy", "45 min psychotherapy")
+- Language: "supportive therapy provided", "psychotherapy performed", "CBT session", "therapeutic intervention", "insight-oriented therapy", "supportive psychotherapy"
+- A dedicated therapy section in the note alongside an E/M section
+
+Time-based rules (when psychotherapy time is documented):
+- ~16–37 min psychotherapy → +90833 (30-min psychotherapy add-on with E/M)
+- ~38–52 min psychotherapy → +90836 (45-min psychotherapy add-on with E/M)
+- ~53+ min psychotherapy  → +90838 (60-min psychotherapy add-on with E/M)
+
+If psychotherapy is mentioned but NO specific time is given:
+- Use +90833 as the default (30-min add-on) when brief/supportive language is used
+- Do NOT add a psychotherapy add-on if therapy is only vaguely implied with no clinical evidence
+
+OTHER ADD-ON CODES (trigger only when specific evidence is present):
+
++90785 — Interactive complexity
+  Trigger: note documents communication barriers requiring interpreter, play therapy, or third-party (e.g. parent/guardian) as required intermediary; OR presence of legally mandated reporting; OR patient has evidence of physical/sexual abuse
+  Keywords: "interpreter used", "required guardian as intermediary", "mandated reporter", "communication barrier"
+
++90847 — Family therapy with patient present
+  Trigger: note explicitly states family session was conducted WITH the patient present
+  Keywords: "family session with patient", "family therapy with [patient name] present"
+
++96127 — Brief behavioral/emotional assessment
+  Trigger: a standardized screening tool was administered (e.g. PHQ-9, GAD-7, ADHD rating scale, Vanderbilt, PSC)
+  Keywords: "PHQ-9 administered", "GAD-7 score", "ADHD screening", "behavioral assessment completed", "Vanderbilt"
+
++99354 — Prolonged office visit (first 30 min beyond typical)
+  Trigger: total visit time documented as ≥75 minutes for 99214, or ≥89 minutes for 99215
+  Only add when the documented time clearly exceeds the E/M code threshold by 30+ minutes
+
+Do NOT include any add-on code unless its specific trigger condition is documented in the note.
 
 ===
 
@@ -262,16 +350,21 @@ When the note is vague or incomplete, infer the most clinically reasonable prima
 - Mention of multiple medications with no clear diagnosis → F32.9 (Major depressive disorder, unspecified) or F41.9 (Anxiety disorder, unspecified) based on context
 - When truly ambiguous, use R69 (Illness, unspecified) — never a Z code
 
-Select EXACTLY ONE primary ICD-10 code. Then optionally list up to 2 secondary codes for active comorbidities being managed in this visit.
+Select EXACTLY ONE primary ICD-10 code. Then list ALL relevant secondary codes for active comorbidities being managed or addressed in this visit. Do NOT stop at 1 or 2 if more are present and evidenced.
+
+HARD RULE: Codes must NOT be guessed or randomly included. They must be triggered only when evidence exists in the note.
 
 Rules:
-- secondaryCodes: only include conditions ACTIVELY being managed in this visit (not incidental history)
+- primary: The single most clinically dominant diagnosis for this visit
+- secondaryCodes: ALL conditions actively being managed or addressed in this visit — include every relevant code the note supports. Do not artificially cap this list.
 - Do NOT list codes for conditions not mentioned or clearly implied by the note
 - secondaryCodes may include Z79.x codes only if the primary is already a real diagnosis code
+- Each code (primary and all secondary) must include a rationale field: 1 sentence explaining why this specific code was selected based on evidence in the note.
+  Example: "Primary diagnosis based on documented autism spectrum disorder with nonverbal communication pattern."
 
 Structure:
-- primary: { code, label }
-- secondaryCodes: [ { code, label }, ... ] — up to 2, can be empty array []
+- primary: { code, label, rationale }
+- secondaryCodes: [ { code, label, rationale }, ... ] — include ALL evidenced active diagnoses, can be empty array []
 
 ===
 
