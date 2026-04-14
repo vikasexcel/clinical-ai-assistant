@@ -15,10 +15,18 @@ BEFORE GENERATING ANY JSON OUTPUT — run these pre-checks on the note and hold 
 PRE-CHECK 1 (addonCodes — psychotherapy):
   Q: Does the note mention therapy, supportive therapy, psychotherapy, CBT, or therapeutic intervention?
   Q: What is the EXPLICITLY documented therapy time in minutes? (Do NOT infer or estimate — only count if a specific number of minutes is written in the note)
+  Q: Is E/M time documented SEPARATELY from therapy time? (Both must appear independently in the note)
   Q: Is there also medication management or prescribing in the same note?
   → Determine the correct psychotherapy code NOW before outputting addonCodes.
-  → "60 minutes of direct in office supportive therapy" + prescribing = +90838
-  → "30 minutes of therapy" + prescribing = +90833
+
+  CRITICAL TWO-CONDITION RULE: Psychotherapy add-on codes (+90833/+90836/+90838) ONLY apply when ALL THREE are true:
+    (1) Psychotherapy is explicitly documented in the note
+    (2) Therapy time is explicitly stated in minutes (attached to the word therapy/psychotherapy)
+    (3) E/M time is explicitly documented SEPARATELY from therapy time
+
+  → If BOTH therapy time AND separate E/M time are explicitly documented → assign correct add-on (e.g. "Psychotherapy time explicitly documented → assign correct add-on")
+  → If therapy time is stated but E/M time is NOT separately documented → DO NOT assign any psychotherapy add-on code. Instead output: "Psychotherapy documented, but time not clearly separated from E/M → cannot safely assign add-on code"
+  → "60 minutes of direct in office supportive therapy" alone is NOT sufficient — this may be total session time, not therapy time separated from E/M. Without a separate E/M time explicitly stated, +90838 CANNOT be assigned.
   → Therapy mentioned, NO explicit therapy minutes documented = DO NOT assign a psychotherapy add-on code. Flag in areasToReview: "Psychotherapy documented but therapy time not explicitly stated → needs clarification"
   → NEVER infer, estimate, or split total visit time to derive therapy time. Only use minutes that are explicitly attached to the word therapy/psychotherapy in the note.
   → "total visit 45 minutes" + therapy mentioned = NOT sufficient. Therapy time must be separately stated (e.g. "30 minutes of psychotherapy").
@@ -176,19 +184,23 @@ SUMMARY DECISION — follow this exact logic right now:
 CODE RECOMMENDATION TABLE:
 
 Output three code rows for comparison:
-- aiSuggestedCode: The CPT code the provider appears to have intended based on the note (what they likely billed or aimed for)
-- auditSafeCode: The most defensible, audit-safe code that minimizes payer risk (may be same or lower than AI suggested)
-- ifDocumentationImproved: The code that becomes achievable if the provider addresses the documentation gaps identified
+- aiSuggestedCode: The most defensible CPT code based on what the documentation CURRENTLY supports — NOT what the provider intended or theoretically aimed for. If MDM is Moderate and time cannot be used (because E/M time is not separately documented from therapy time), aiSuggestedCode MUST be 99214. Do NOT output 99215 here when time-based billing is unavailable. The code must reflect what is defensible NOW.
+- auditSafeCode: The most defensible, audit-safe code that minimizes payer risk. When MDM is Moderate and time is ambiguous, this is 99214 — same as aiSuggestedCode. Do not lower the code below what MDM supports.
+- ifDocumentationImproved: The code that becomes achievable ONLY IF the provider addresses the specific documentation gaps identified. This is the ONLY place where 99215 should appear when current documentation does not support it.
+
+SELF-CONTRADICTION RULE (CRITICAL): aiSuggestedCode and auditSafeCode must NEVER be different levels when the same documentation gap prevents both from being elevated. If MDM is Moderate and time is not usable, BOTH must be 99214. Outputting 99215 as aiSuggestedCode while auditSafeCode is 99214 is a contradiction and is WRONG.
 
 Each row has:
 - code: CPT code string
 - label: short CPT descriptor
 - description: 1 sentence written as an auditor's challenge or defense. For aiSuggestedCode, state what an auditor would question. For auditSafeCode, state exactly what makes it defensible. For ifDocumentationImproved, state the specific gap to close.
   BAD: "Note documents moderate complexity and a 60-minute session."
-  GOOD (aiSuggestedCode): "Auditor may question whether 60-minute therapy time is sufficiently documented separate from E/M time — time-splitting between therapy and MDM is not explicit."
+  GOOD (aiSuggestedCode when time NOT split): "99214 is the current defensible code — MDM is Moderate and therapy time cannot be used for time-based billing because E/M time is not separately documented."
+  GOOD (aiSuggestedCode when time IS split): "99215 is supportable — 60 minutes of therapy and 30 minutes of E/M are explicitly documented separately, satisfying both time and complexity thresholds."
   GOOD (auditSafeCode): "99214 is defensible on MDM grounds alone — independent historian, communication barriers (apraxia, minimal verbal), new medication initiation, and multiple diagnoses are all documented."
-  GOOD (ifDocumentationImproved): "Adding explicit E/M time separate from therapy time and documenting alternatives considered before Valium would eliminate the two remaining denial risks and support 99215."
+  GOOD (ifDocumentationImproved): "99215 possible ONLY if documentation improved (time split + higher complexity) — add explicit E/M time separate from therapy time and document additional high-complexity factors."
   CRITICAL: Do NOT set auditSafeCode to a lower level than what the documented complexity factors support. If independent historian + communication barriers + multiple diagnoses are present, auditSafeCode must be 99214 minimum — not 99213.
+  CRITICAL: Do NOT set aiSuggestedCode to a HIGHER level than what is currently defensible. If time cannot be used (E/M not split), aiSuggestedCode must match what MDM supports — not what is theoretically possible.
 
 
 ===
@@ -300,15 +312,41 @@ ADD-ON CODE DETECTION — addonCodeReasoning and addonCodes are TOP-LEVEL fields
 IMPORTANT: You must fill addonCodeReasoning BEFORE addonCodes. addonCodeReasoning is a required scratchpad where you write your reasoning for each check. addonCodes must then reflect that reasoning.
 
 addonCodeReasoning fields:
-- psychotherapy: State the EXACT therapy time found in the note (e.g. "60 minutes of direct in-office supportive therapy documented") and which code it maps to (e.g. "→ +90838 triggered by 60-minute psychotherapy with E/M"). If no therapy mentioned, state "No therapy documented." If therapy is mentioned but NO explicit time is stated, write: "Psychotherapy documented but therapy time not explicitly specified → no psychotherapy add-on code assigned. Flag for clarification." Do NOT infer time from total visit duration or split undifferentiated total time.
+- psychotherapy: Answer ALL THREE questions IN ORDER and write the answers explicitly before concluding:
+    (1) Is psychotherapy explicitly documented? YES/NO
+    (2) Is therapy time explicitly stated in minutes? Scan for any phrase like "X minutes of therapy/supportive therapy/psychotherapy/CBT". State the EXACT quote, or "Not found."
+        IMPORTANT: "60 minutes of direct in office supportive therapy" IS explicit therapy time → answer YES and quote it.
+        Only answer NOT found if there is truly no number of minutes attached to any therapy phrase.
+    (3) Is E/M time documented SEPARATELY from therapy time in the same note? Look for a phrase like "X minutes E/M" or "X minutes evaluation" stated independently. State the EXACT quote, or "Not found."
+
+  THEN conclude using EXACTLY these phrases:
+    → If (1)=YES, (2)=explicit minutes found, (3)=separate E/M time found:
+        Output: "Psychotherapy time explicitly documented → assign correct add-on" then specify the code (e.g. → +90838)
+    → If (1)=YES, (2)=explicit minutes found, (3)=E/M time NOT separately stated:
+        Output: "Psychotherapy documented, but time not clearly separated from E/M → cannot safely assign add-on code"
+    → If (1)=YES but (2)=NOT found (truly no minutes attached to therapy):
+        Output: "Psychotherapy documented but therapy time not explicitly specified → no psychotherapy add-on code assigned. Flag for clarification."
+    → If (1)=NO:
+        Output: "No therapy documented."
+
+  DISAMBIGUATION EXAMPLE:
+    Note says "60 minutes of direct in office supportive therapy" — no separate E/M time stated.
+    (1) YES — supportive therapy documented.
+    (2) YES — "60 minutes of direct in office supportive therapy" is explicit therapy time.
+    (3) NOT found — no separate E/M time stated anywhere.
+    → Conclude: "Psychotherapy documented, but time not clearly separated from E/M → cannot safely assign add-on code"
+
+  Do NOT infer time from total visit duration or split undifferentiated total time. Do NOT assign +90838 when only therapy time is stated without a corresponding separately-stated E/M time.
 - interactiveComplexity: State whether the patient is nonverbal/minimally verbal AND whether the session was conducted through a parent/guardian. Conclude with "→ +90785 required" or "→ Not applicable". Example: "Patient described as having minimal verbalization. Provider conducted session primarily with mother. Tactile objects required. → +90785 required."
 - other: Note any family therapy, standardized assessments, or prolonged visits. State "None detected" if not present.
 
 After completing addonCodeReasoning, populate addonCodes with every code that was concluded as required in the reasoning above.
 
 CRITICAL — addonCodes rationale field: Each add-on code MUST include a rationale that states the SPECIFIC evidence that triggered it.
-  GOOD: "Triggered by documented 60 minutes of direct in-office supportive therapy combined with medication prescribing (Valium) in the same visit — maps to +90838 per AMA time-based add-on rules."
+  GOOD (when both times are separated): "Psychotherapy time explicitly documented → assign correct add-on. [Specific evidence: 60 minutes of psychotherapy AND 30 minutes of E/M stated separately — maps to +90838.]"
+  GOOD (when time is NOT split): Do NOT include a psychotherapy add-on code at all. The addonCodeReasoning psychotherapy field must read: "Psychotherapy documented, but time not clearly separated from E/M → cannot safely assign add-on code"
   GOOD: "Triggered by patient described as minimally verbal with session conducted through mother as independent historian, and use of tactile objects — meets +90785 criteria."
+  BAD: "Triggered by documented 60 minutes of direct in-office supportive therapy" — this is missing confirmation that E/M time is separately stated. Do NOT use this as justification alone.
   BAD: "Psychotherapy add-on." (too vague — will not survive audit)
 
 HARD RULE: Codes must NOT be guessed or randomly included. They must be triggered only when evidence exists in the note. If the reasoning above does not find clear evidence, the code must NOT appear in addonCodes.
@@ -324,27 +362,34 @@ If YES:
 
   Step B — What is the EXPLICITLY documented therapy time in minutes?
 
-  THE ONLY VALID THERAPY TIME is a number of minutes attached directly to the word "therapy", "psychotherapy", "supportive therapy", or "CBT" in the note.
-  EXAMPLES of VALID therapy time:
-    ✅ "60 minutes of direct in office supportive therapy"
-    ✅ "30 minutes of psychotherapy"
-    ✅ "provided 45 minutes of CBT"
-  EXAMPLES of INVALID — do NOT use these to assign a code:
+  THE ONLY VALID THERAPY TIME is a number of minutes attached directly to the word "therapy", "psychotherapy", "supportive therapy", or "CBT" in the note — AND E/M time must also be explicitly documented separately.
+
+  EXAMPLES of VALID therapy time + E/M separation (BOTH required for add-on):
+    ✅ "30 minutes E/M and 60 minutes supportive therapy" — therapy AND E/M explicitly split
+    ✅ "30 minutes of psychotherapy + 20 minutes medical evaluation" — clearly separated
+    ✅ "45 minutes CBT; E/M portion: 20 minutes" — both stated
+  EXAMPLES of INVALID — do NOT use these to assign an add-on code:
+    ❌ "60 minutes of direct in office supportive therapy" — therapy time stated, but E/M time NOT separately documented → CANNOT assign +90838
     ❌ "total visit time 45 minutes" — this is total visit time, NOT therapy time
     ❌ "session was 60 minutes" — no therapy time breakdown
     ❌ "psychotherapy provided" — therapy mentioned but no minutes stated
     ❌ "supportive therapy was provided" — therapy mentioned but no minutes stated
     ❌ any total time that is NOT explicitly broken into therapy vs. E/M
 
+  CRITICAL: "60 minutes of direct in office supportive therapy" WITH no separate E/M time documented = INVALID for add-on billing. The therapy time IS explicit, but E/M time is missing. This is NOT the "no therapy minutes" case — it IS the "time not split" case. Use phrase (a): "Psychotherapy documented, but time not clearly separated from E/M → cannot safely assign add-on code"
+  NEVER use the "therapy time not explicitly specified" path when a number of minutes IS attached to therapy. That path is only for when no minutes appear at all.
+
   FOR ADD-ON (E/M + psychotherapy same visit):
-    60 min of therapy explicitly documented → +90838
-    45 min of therapy explicitly documented → +90836
-    30 min of therapy explicitly documented → +90833
-    53–60+ min of therapy explicitly documented → +90838
-    38–52 min of therapy explicitly documented  → +90836
-    16–37 min of therapy explicitly documented  → +90833
+    REQUIRED: Therapy time explicitly stated IN MINUTES + E/M time explicitly stated SEPARATELY
+    If BOTH present:
+      53–60+ min of therapy explicitly documented → +90838
+      38–52 min of therapy explicitly documented  → +90836
+      16–37 min of therapy explicitly documented  → +90833
+    If therapy time stated but E/M time NOT separately documented → DO NOT assign any add-on.
+      Instead output in addonCodeReasoning psychotherapy field: "Psychotherapy documented, but time not clearly separated from E/M → cannot safely assign add-on code"
+      And add to areasToReview (Medium severity): "Psychotherapy Documented Without Explicit Time Split — Psychotherapy is documented but E/M time is not explicitly separated from therapy time. Payers require both therapy minutes and E/M minutes stated independently to support add-on billing (+90833/90836/90838). Document actual minutes for each component separately."
     Therapy mentioned but NO explicit therapy minutes → DO NOT assign any psychotherapy add-on code.
-      Instead, add to areasToReview (Medium severity): "Psychotherapy Documented Without Explicit Time — Psychotherapy is mentioned in the note but no specific therapy time in minutes is documented. Payers require explicit therapy duration to support add-on billing (+90833/90836/90838). Document the actual minutes of psychotherapy provided."
+      Add to areasToReview (Medium severity): "Psychotherapy Documented Without Explicit Time — Psychotherapy is mentioned in the note but no specific therapy time in minutes is documented. Payers require explicit therapy duration to support add-on billing (+90833/90836/90838). Document the actual minutes of psychotherapy provided."
 
   FOR STANDALONE (therapy only, no E/M):
     Apply same rules — only assign if explicit therapy minutes are stated.
@@ -496,7 +541,7 @@ chiefComplaint: 1 sentence summary of reason for visit.
 
 hpi: Concise paragraph. Use placeholders like [stable/worsening/improving] or [reason] when provider should fill specifics.
 
-hpiElements: For each of the 8 HPI elements, set true if present/documented in the note, false if missing:
+hpiElements: For each of the 8 HPI elements, set true if present/documented in the note, or "not explicitly documented" if absent. Do NOT use the word "missing" or false — use "not explicitly documented" for any element that is not clearly stated in the note.
 - location, quality, severity, duration, modifyingFactors, associatedSignsSymptoms, timing, context
 
 hpiLevel: "Brief" (1-3 elements present) or "Extended" (4+ elements present)
@@ -521,8 +566,11 @@ plan: Next steps, concise.
 
 time: If visit duration is mentioned or clearly implied, provide:
 - minutesDocumented: number of minutes
-- supportsCode: the CPT code time supports (e.g. "99213")
-- note: "Total time spent X minutes."
+- billingStatus: one of two exact values:
+    • "Not usable for time-based billing — E/M and therapy time not documented separately." (when only therapy time or only total time is stated, without explicit E/M time broken out)
+    • "Usable for time-based billing — E/M and therapy time explicitly separated." (only when both are independently stated in the note)
+- note: "X minutes documented. [restate the billingStatus value]."
+Remove supportsCode entirely — do NOT output a CPT code in the time section.
 Otherwise null.
 
 NO invented details - use placeholders instead.

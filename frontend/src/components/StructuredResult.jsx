@@ -353,17 +353,19 @@ function StructuredResultComponent({ result }) {
                           { key: "timing", label: "timing" },
                           { key: "context", label: "context" },
                         ].map(({ key, label }) => {
-                          const present = structuredNote.hpiElements[key];
+                          const val = structuredNote.hpiElements[key];
+                          const present = val === true;
+                          const absent = val === "not explicitly documented";
                           return (
                             <span
                               key={key}
                               className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
                                 present
                                   ? "bg-indigo-100 text-indigo-900 ring-1 ring-indigo-200"
-                                  : "bg-amber-50 text-amber-900 ring-1 ring-amber-200"
+                                  : "bg-slate-100 text-slate-400 ring-1 ring-slate-200"
                               }`}
                             >
-                              {present ? label : `${label} (missing)`}
+                              {present ? label : `${label} (not explicitly documented)`}
                             </span>
                           );
                         })}
@@ -461,11 +463,16 @@ function StructuredResultComponent({ result }) {
                       <span className="text-[14px] text-slate-900">
                         {structuredNote.time.minutesDocumented} minutes documented
                       </span>
-                      <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[12px] font-semibold text-sky-900 ring-1 ring-sky-200">
-                        Supports {structuredNote.time.supportsCode}
-                      </span>
+                      {structuredNote.time.billingStatus && (
+                        <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-semibold ring-1 ${
+                          structuredNote.time.billingStatus.toLowerCase().includes('not usable')
+                            ? 'bg-amber-50 text-amber-800 ring-amber-200'
+                            : 'bg-sky-100 text-sky-900 ring-sky-200'
+                        }`}>
+                          {structuredNote.time.billingStatus}
+                        </span>
+                      )}
                     </div>
-                    <p className="mt-1 text-[12px] text-slate-500">{structuredNote.time.note}</p>
                   </div>
                 )}
               </div>
