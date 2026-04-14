@@ -42,6 +42,8 @@ export const clinicalAssistantInsightsSchema = z.object({
         severity: z.enum(["High", "Medium", "Low"]),
         title: z.string().min(1),
         body: z.string().min(1),
+        /** CPT/HCPCS most relevant to this finding (e.g. 99214, 90838); omit or null if not code-specific */
+        code: z.union([z.string().min(1), z.null()]).optional(),
       }),
     )
     .min(1)

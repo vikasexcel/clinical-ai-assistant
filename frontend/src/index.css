@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Literata", ui-serif, Georgia, "Times New Roman", serif;
+
+  /* MedClaim AI reference UI */
+  --color-medclaim-bg: #f9fafb;
+  --color-medclaim-brand: #00685b;
+  --color-medclaim-primary: #93c5be;
+  --color-medclaim-primary-hover: #7eb4ad;
+  --color-medclaim-border: #d1d5db;
+  --color-medclaim-muted: #6b7280;
+  --color-medclaim-placeholder: #9ca3af;
 
   /* Clinical workbench — calm paper, deep teal accent (not generic “AI green”) */
   --color-clinical-bg: #eef1ed;
@@ -58,18 +67,11 @@ body {
   min-height: 100dvh;
   height: 100svh;
   height: 100dvh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   font-family: var(--font-sans);
-  background-color: var(--color-clinical-bg);
-  --clinical-bg-image: radial-gradient(
-      120% 80% at 50% -20%,
-      rgba(15, 92, 77, 0.07),
-      transparent 55%
-    ),
-    radial-gradient(80% 50% at 100% 0%, rgba(212, 196, 176, 0.12), transparent 45%);
-  background-image: var(--clinical-bg-image);
-  background-attachment: fixed;
-  color: var(--color-clinical-ink);
+  background-color: var(--color-medclaim-bg);
+  color: #111827;
 }
 
 body,

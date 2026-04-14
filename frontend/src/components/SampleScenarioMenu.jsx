@@ -5,7 +5,7 @@ function ChevronIcon({ className, open }) {
   return (
     <svg
       aria-hidden
-      className={`shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""} ${className ?? ""}`}
+      className={`shrink-0 text-[#6b7280] transition-transform duration-200 ${open ? "rotate-180" : ""} ${className ?? ""}`}
       fill="none"
       height="14"
       viewBox="0 0 14 14"
@@ -23,7 +23,7 @@ function ChevronIcon({ className, open }) {
 }
 
 /**
- * “Load sample” control: short scenario names in a floating panel (opens upward above the composer).
+ * “Load sample…” control — matches MedClaim reference dropdown styling.
  */
 export function SampleScenarioMenu({ disabled, onSelectText }) {
   const [open, setOpen] = useState(false);
@@ -55,7 +55,7 @@ export function SampleScenarioMenu({ disabled, onSelectText }) {
   }, [open]);
 
   return (
-    <div className="relative" ref={wrapRef}>
+    <div className="relative min-w-0" ref={wrapRef}>
       <button
         ref={triggerRef}
         type="button"
@@ -65,24 +65,24 @@ export function SampleScenarioMenu({ disabled, onSelectText }) {
         aria-controls={open ? listId : undefined}
         id={`${listId}-trigger`}
         onClick={() => setOpen((previous) => !previous)}
-        className="group inline-flex min-h-[36px] items-center gap-2 rounded-xl border border-clinical-border bg-clinical-surface px-3 py-1.5 text-[13px] font-medium text-clinical-ink shadow-sm transition hover:border-clinical-line/50 hover:shadow disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus-visible:ring-2 focus-visible:ring-clinical-accent/30"
+        className="inline-flex h-10 min-w-[11.5rem] max-w-full items-center justify-between gap-3 rounded-lg border border-[#d1d5db] bg-white px-3.5 py-2 text-left text-[14px] font-medium text-gray-800 shadow-none transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00685b]/25 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        <span className="whitespace-nowrap">Load sample</span>
-        <ChevronIcon className="text-clinical-muted group-hover:text-clinical-ink" open={open} />
+        <span className="truncate">Load Sample...</span>
+        <ChevronIcon open={open} />
       </button>
 
       {open ? (
         <div
-          className="absolute bottom-[calc(100%+6px)] left-0 z-[100] min-w-[min(18rem,calc(100vw-2rem))] max-w-[min(22rem,calc(100vw-2rem))] origin-bottom motion-safe:animate-[sampleMenuIn_0.18s_ease-out_both]"
+          className="absolute left-0 top-[calc(100%+6px)] z-[100] min-w-[min(18rem,calc(100vw-2rem))] max-w-[min(22rem,calc(100vw-2rem))] origin-top motion-safe:animate-[sampleMenuIn_0.18s_ease-out_both]"
           role="presentation"
         >
           <div
-            className="rounded-xl border border-clinical-border bg-clinical-surface/98 p-1 shadow-[0_16px_48px_rgba(22,25,23,0.12)] backdrop-blur-md"
+            className="rounded-lg border border-[#d1d5db] bg-white p-1 shadow-[0_10px_40px_rgba(17,24,39,0.08)]"
             id={listId}
             role="listbox"
             aria-labelledby={`${listId}-trigger`}
           >
-            <p className="border-b border-clinical-border-soft px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-clinical-muted">
+            <p className="border-b border-[#e5e7eb] px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6b7280]">
               Test scenarios
             </p>
             <ul className="max-h-[min(50vh,280px)] overflow-y-auto py-1">
@@ -91,7 +91,7 @@ export function SampleScenarioMenu({ disabled, onSelectText }) {
                   <button
                     type="button"
                     role="option"
-                    className="flex w-full rounded-lg px-3 py-2.5 text-left text-[13px] leading-snug text-clinical-ink transition hover:bg-clinical-elevated focus:bg-clinical-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-clinical-accent/25"
+                    className="flex w-full rounded-md px-3 py-2.5 text-left text-[13px] leading-snug text-gray-900 transition hover:bg-[#f9fafb] focus:bg-[#f9fafb] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00685b]/20"
                     onClick={() => {
                       onSelectText(scenario.text);
                       setOpen(false);

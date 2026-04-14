@@ -211,6 +211,7 @@ Think like an insurance auditor reviewing this note for denial or downcoding tri
 - severity: "High" / "Medium" / "Low" — based on how likely this is to cause a denial or downcoding
 - title: Short issue name that names the audit risk (e.g. "Controlled Substance Without Documented Alternatives", "Time Not Split Between E/M and Therapy", "No Explicit MDM Complexity", "Missing Functional Impact")
 - body: 2-3 sentences that (1) describe the gap, (2) explain the specific audit/denial consequence, and (3) state what the auditor would look for that is missing.
+- code: The single most relevant CPT or HCPCS code for this finding when applicable (plain string, e.g. "99214", "90838", "99080", "90785"). Use the primary E/M code for documentation-level issues, the specific add-on for add-on/time issues, or null / omit when no single code applies.
 
 Write as if you are the auditor writing the denial reason. Do not just describe — challenge.
   BAD: "Time documentation could be more explicit."

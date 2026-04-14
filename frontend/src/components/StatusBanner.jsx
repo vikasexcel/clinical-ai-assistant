@@ -1,7 +1,7 @@
 const toneClasses = {
   success: "border-emerald-200 bg-emerald-50/90 text-emerald-950",
   error: "border-red-200 bg-red-50/90 text-red-950",
-  info: "border-clinical-border bg-clinical-elevated text-clinical-ink",
+  info: "border-[#d1d5db] bg-white text-gray-800",
 };
 
 export function StatusBanner({ tone = "info", message }) {
@@ -11,7 +11,7 @@ export function StatusBanner({ tone = "info", message }) {
 
   return (
     <div
-      className={`rounded-xl border px-3.5 py-2.5 text-[13px] leading-snug shadow-sm ${toneClasses[tone] ?? toneClasses.info}`}
+      className={`rounded-lg border px-3 py-2 text-[12px] leading-snug ${toneClasses[tone] ?? toneClasses.info}`}
       aria-live="polite"
     >
       <p className="break-words">{message}</p>

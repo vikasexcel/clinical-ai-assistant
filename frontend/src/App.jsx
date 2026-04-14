@@ -1,7 +1,6 @@
 import { useState } from "react";
 
 import { ChatComposer } from "./components/ChatComposer.jsx";
-import { ChatHeader } from "./components/ChatHeader.jsx";
 import { ChatThread } from "./components/ChatThread.jsx";
 import { StatusBanner } from "./components/StatusBanner.jsx";
 import { useAudioRecorder } from "./hooks/useAudioRecorder.js";
@@ -109,57 +108,67 @@ export default function App() {
 
   const activeStatusMessage = recorder.error || status;
   const statusTone = recorder.error ? "error" : status ? "success" : "info";
+  const hasOutput = messages.length > 0;
 
   return (
     <>
       <a
-        className="absolute left-4 top-4 z-50 -translate-y-[200%] rounded-lg border border-clinical-border bg-clinical-surface px-3 py-2 text-sm text-clinical-ink shadow-sm transition focus:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-clinical-accent/35"
+        className="absolute left-4 top-4 z-50 -translate-y-[200%] rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-sm text-gray-900 shadow-sm transition focus:translate-y-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00685b]/35"
         href="#main-content"
       >
         Skip to main content
       </a>
 
-      <div className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-transparent">
-        <ChatHeader disableNewChat={isSubmitting} onNewChat={handleClearChat} />
-
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
-          {/* Left: encounter intake (form workspace — not a chat composer dock) */}
-          <aside className="flex max-h-[min(52svh,28rem)] min-h-0 shrink-0 flex-col overflow-hidden border-b border-clinical-border-soft bg-clinical-surface/90 lg:max-h-none lg:w-[min(100%,26rem)] lg:shrink-0 lg:border-b-0 lg:border-r lg:pt-0">
-            <div className="shrink-0 border-b border-clinical-border-soft px-4 py-3 sm:px-5 sm:py-4 lg:border-b-0 lg:pt-5">
-              <h2 className="font-display text-[1.15rem] font-semibold tracking-tight text-clinical-ink">
-                Encounter intake
-              </h2>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-clinical-muted">
-                Add free-text notes, an image, or a voice clip. This is structured like a documentation form, not a chat thread.
-              </p>
+      <div className="flex min-h-dvh flex-col bg-[#f9fafb]">
+        <div className="mx-auto flex w-full max-w-[52rem] flex-1 flex-col px-5 pb-12 pt-10 sm:px-8 sm:pt-12">
+          <header className="mb-5 sm:mb-6">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h1 className="text-[1.75rem] font-bold leading-tight tracking-tight sm:text-[1.875rem]">
+                  <span className="text-[#00685b]">MedClaim</span>
+                  <span className="text-gray-900"> AI</span>
+                </h1>
+                <p className="mt-1.5 max-w-xl text-[0.9375rem] leading-snug text-[#6b7280]">
+                  Psychiatric billing assistant — structure notes, suggest codes, check risk
+                </p>
+              </div>
+              {hasOutput ? (
+                <button
+                  className="shrink-0 rounded-lg border border-[#d1d5db] bg-white px-3 py-2 text-[13px] font-medium text-[#6b7280] transition hover:bg-gray-50 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Clear session and start over"
+                  disabled={isSubmitting}
+                  onClick={handleClearChat}
+                  type="button"
+                >
+                  Clear session
+                </button>
+              ) : null}
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <ChatComposer
-                imageFile={imageFile}
-                isSubmitting={isSubmitting}
-                onImageChange={handleImageChange}
-                onReset={handleReset}
-                onSubmit={handleSubmit}
-                onTextChange={handleTextChange}
-                recorder={recorder}
-                text={text}
-              />
-            </div>
-          </aside>
+          </header>
 
-          {/* Right: documentation output (chart-style preview pane) */}
-          <main
-            id="main-content"
-            className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-clinical-bg/40"
-          >
+          <main id="main-content" className="flex min-h-0 flex-1 flex-col">
+            <ChatComposer
+              imageFile={imageFile}
+              isSubmitting={isSubmitting}
+              onImageChange={handleImageChange}
+              onReset={handleReset}
+              onSubmit={handleSubmit}
+              onTextChange={handleTextChange}
+              recorder={recorder}
+              text={text}
+            />
+
             {activeStatusMessage ? (
-              <div className="shrink-0 border-b border-clinical-border-soft bg-clinical-surface/60 px-3 py-2.5 sm:px-6 sm:py-3">
+              <div className="mt-5 border-t border-[#e5e7eb] pt-4">
                 <StatusBanner message={activeStatusMessage} tone={recorder.error ? "error" : statusTone} />
               </div>
             ) : null}
-            <div className="min-h-0 flex-1 overflow-y-auto scroll-smooth overscroll-y-contain">
-              <ChatThread messages={messages} />
-            </div>
+
+            {hasOutput ? (
+              <div className="mt-5 min-h-0 flex-1">
+                <ChatThread messages={messages} />
+              </div>
+            ) : null}
           </main>
         </div>
       </div>
