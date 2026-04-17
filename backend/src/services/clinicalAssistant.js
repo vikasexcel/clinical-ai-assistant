@@ -1,6 +1,13 @@
 import { Agent, run } from "@openai/agents";
 
 import { appConfig, assertAiConfigured } from "../config.js";
+import {
+  normalizeAddonCodes,
+  normalizeCptEligibility,
+  normalizeProcedureCodeRow,
+  normalizeRecommendedCpt,
+  sanitizeCptEligibilityAgainstPrimary,
+} from "../data/psychiatryCptLibrary.js";
 import { clinicalAssistantPrompt } from "../prompts/clinicalAssistantPrompt.js";
 import {
   clinicalAnalysisResponseSchema,
@@ -16,6 +23,29 @@ const clinicalAssistantAgent = new Agent({
 
 function joinDraftSections(sections) {
   return sections.filter(Boolean).join("\n\n").trim();
+}
+
+/** Remove stray "Supports 99xxx" lines the model sometimes adds to time.note (contradicts billingStatus). */
+function stripSupportsCptLinesFromTimeNote(note) {
+  if (!note || typeof note !== "string") return note;
+  return note
+    .split("\n")
+    .filter(line => !/^\s*Supports\s+99\d{3}\b/i.test(line.trim()))
+    .join("\n")
+    .trim();
+}
+
+function sanitizeStructuredNoteTime(time) {
+  if (!time) return time;
+  return { ...time, note: stripSupportsCptLinesFromTimeNote(time.note) };
+}
+
+/** Clinical guidance header must reference the recommended CPT actually billed, not a hypothetical higher code. */
+function alignSupportGuidanceHeader(header, recommendedCode) {
+  if (!header || typeof header !== "string" || !recommendedCode) return header;
+  const t = header.trim();
+  if (!/^How to support \d{5}\s*:/i.test(t)) return header;
+  return header.replace(/^How to support \d{5}(\s*:)/i, `How to support ${recommendedCode}$1`);
 }
 
 // Deterministic pre-analysis of controlled substance documentation.
@@ -153,8 +183,35 @@ export async function generateClinicalAnalysis(inputSummary) {
     throw new Error("The assistant did not return a structured response.");
   }
 
-  return clinicalAnalysisResponseSchema.parse({
+  const parsed = clinicalAnalysisResponseSchema.parse({
     inputSummary,
     ...result.finalOutput,
   });
+
+  const recommendedCode = parsed.billingDecision.recommendedCpt.code;
+
+  return {
+    ...parsed,
+    billingDecision: {
+      ...parsed.billingDecision,
+      recommendedCpt: normalizeRecommendedCpt(parsed.billingDecision.recommendedCpt),
+    },
+    codeRecommendation: {
+      aiSuggestedCode: normalizeProcedureCodeRow(parsed.codeRecommendation.aiSuggestedCode),
+      auditSafeCode: normalizeProcedureCodeRow(parsed.codeRecommendation.auditSafeCode),
+      ifDocumentationImproved: normalizeProcedureCodeRow(parsed.codeRecommendation.ifDocumentationImproved),
+    },
+    supportGuidance: {
+      ...parsed.supportGuidance,
+      header: alignSupportGuidanceHeader(parsed.supportGuidance.header, recommendedCode),
+    },
+    structuredNote: parsed.structuredNote?.time
+      ? { ...parsed.structuredNote, time: sanitizeStructuredNoteTime(parsed.structuredNote.time) }
+      : parsed.structuredNote,
+    addonCodes: normalizeAddonCodes(parsed.addonCodes),
+    cptEligibility: sanitizeCptEligibilityAgainstPrimary(
+      recommendedCode,
+      normalizeCptEligibility(parsed.cptEligibility),
+    ),
+  };
 }

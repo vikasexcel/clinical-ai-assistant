@@ -152,6 +152,29 @@ export const clinicalAssistantInsightsSchema = z.object({
       }),
     )
     .default([]),
+  /** Eligibility vs recommendation: fully supported vs needs documentation (Vikas.docx) */
+  cptEligibility: z
+    .object({
+      recommendedCodes: z.array(
+        z.object({
+          code: z.string().min(1),
+          label: z.string().min(1),
+          category: z.string().min(1),
+          rationale: z.string().min(1),
+        }),
+      ),
+      eligibleIfDocumentationImproved: z.array(
+        z.object({
+          code: z.string().min(1),
+          label: z.string().min(1),
+          category: z.string().min(1),
+          documentationNeeded: z.string().min(1),
+        }),
+      ),
+    })
+    .default({ recommendedCodes: [], eligibleIfDocumentationImproved: [] }),
+  /** When psychotherapy add-on criteria fail only because E/M vs therapy time is not separable */
+  psychotherapyTimeSeparabilityWarning: z.string().nullable().default(null),
 });
 
 export const clinicalAnalysisResponseSchema = z.object({
@@ -178,4 +201,6 @@ export const clinicalAnalysisResponseSchema = z.object({
   icd10: clinicalAssistantInsightsSchema.shape.icd10,
   addonCodeReasoning: clinicalAssistantInsightsSchema.shape.addonCodeReasoning,
   addonCodes: clinicalAssistantInsightsSchema.shape.addonCodes,
+  cptEligibility: clinicalAssistantInsightsSchema.shape.cptEligibility,
+  psychotherapyTimeSeparabilityWarning: clinicalAssistantInsightsSchema.shape.psychotherapyTimeSeparabilityWarning,
 });

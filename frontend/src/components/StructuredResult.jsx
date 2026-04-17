@@ -16,6 +16,27 @@ function firstLikelyProcedureCode(text) {
   return m ? m[1] : null;
 }
 
+/** UI hint for add-on row: not all add-ons pair only with E/M */
+function addonPairingHint(addonCode, primaryCptCode) {
+  const base = String(addonCode || "").replace(/^\++/, "");
+  if (base === "90785") {
+    return { title: "Interactive complexity (add-on)", subtitle: "Pair with the documented primary service (E/M, psychotherapy, or group) per payer policy." };
+  }
+  if (base === "90840") {
+    return { title: "Crisis psychotherapy (add-on)", subtitle: "Each additional 30 min beyond 74 min with 90839 when documented." };
+  }
+  if (base === "99354") {
+    return { title: "Prolonged service (add-on)", subtitle: "With qualifying E/M when prolonged time thresholds are met." };
+  }
+  if (base === "96127") {
+    return { title: "Brief assessment (add-on)", subtitle: `With documented evaluation when applicable (primary ${primaryCptCode}).` };
+  }
+  if (base === "90845") {
+    return { title: "Psychoanalysis (primary)", subtitle: "Standalone procedure — not an E/M add-on. If this row appears, verify the visit was formal psychoanalysis." };
+  }
+  return { title: "Psychotherapy add-on (with E/M)", subtitle: `Bill with E/M ${primaryCptCode} when psychotherapy and times are separately documented.` };
+}
+
 function RiskSummaryPanel({ billingDecision, riskScore }) {
   if (!billingDecision && !riskScore) return null;
 
@@ -50,6 +71,64 @@ function RiskSummaryPanel({ billingDecision, riskScore }) {
       {riskScore?.summary ? (
         <p className="mt-2 text-[13px] leading-snug text-[#6B7280]">{riskScore.summary}</p>
       ) : null}
+    </section>
+  );
+}
+
+function CptEligibilityPanel({ cptEligibility }) {
+  const recommended = cptEligibility?.recommendedCodes ?? [];
+  const eligibleIfImproved = cptEligibility?.eligibleIfDocumentationImproved ?? [];
+  if (recommended.length === 0 && eligibleIfImproved.length === 0) return null;
+
+  return (
+    <section className="rounded-lg border border-[#E5E7EB] bg-white p-3 shadow-[0_1px_2px_rgba(0,0,0,0.04)] sm:p-4">
+      <h3 className="mb-2.5 text-[14px] font-bold text-gray-900">Procedure code eligibility</h3>
+      <p className="mb-3 text-[12px] leading-snug text-[#6B7280]">
+        Fully supported codes are recommended for billing; partial documentation yields codes that become eligible only after specific chart improvements.
+      </p>
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 md:items-start">
+        <div className="rounded-lg border border-[#99F6E4]/80 bg-[#F2FAF9] p-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#0D6A6B]">Recommended codes</p>
+          {recommended.length === 0 ? (
+            <p className="mt-2 text-[12px] text-[#6B7280]">None fully supported under current documentation.</p>
+          ) : (
+            <ul className="m-0 mt-2 space-y-2 p-0">
+              {recommended.map((row, i) => (
+                <li key={`rec-${i}-${row.code}`} className="rounded-md border border-[#5EEAD4]/40 bg-white/90 p-2.5">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="font-mono text-[13px] font-bold text-[#0D6A6B]">{row.code.replace(/^\++/, "")}</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-[#6B7280]">{row.category}</span>
+                  </div>
+                  <p className="mt-0.5 text-[12px] font-semibold text-gray-900">{row.label}</p>
+                  <p className="mt-1 text-[11px] leading-snug text-[#4B5563]">{row.rationale}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div className="rounded-lg border border-amber-200/80 bg-[#FFFBEB] p-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#B45309]">Eligible if documentation improved</p>
+          {eligibleIfImproved.length === 0 ? (
+            <p className="mt-2 text-[12px] text-[#92400E]/90">No additional codes pending only documentation gaps.</p>
+          ) : (
+            <ul className="m-0 mt-2 space-y-2 p-0">
+              {eligibleIfImproved.map((row, i) => (
+                <li key={`elig-${i}-${row.code}`} className="rounded-md border border-amber-200/60 bg-white/90 p-2.5">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                    <span className="font-mono text-[13px] font-bold text-[#92400E]">{row.code.replace(/^\++/, "")}</span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-[#B45309]">{row.category}</span>
+                  </div>
+                  <p className="mt-0.5 text-[12px] font-semibold text-gray-900">{row.label}</p>
+                  <p className="mt-1 text-[11px] leading-snug text-[#92400E]">
+                    <span className="font-semibold text-[#78350F]">Needed: </span>
+                    {row.documentationNeeded}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </section>
   );
 }
@@ -390,9 +469,14 @@ function StructuredChartCard({ structuredNote, primaryCptCode }) {
                   {structuredNote.time.billingStatus}
                 </span>
               ) : null}
-              {primaryCptCode ? (
+              {primaryCptCode && structuredNote.time.billingStatus?.includes("Usable for time-based billing") ? (
                 <span className="rounded-md bg-sky-100 px-2.5 py-0.5 text-[12px] font-semibold text-sky-900 ring-1 ring-sky-200">
-                  Supports {primaryCptCode}
+                  Supports {primaryCptCode} (time-based billing)
+                </span>
+              ) : null}
+              {structuredNote.time.billingStatus?.includes("Not usable for time-based billing") ? (
+                <span className="rounded-md bg-[#F3F4F6] px-2.5 py-0.5 text-[11px] font-medium text-[#6B7280] ring-1 ring-[#E5E7EB]">
+                  E/M level from MDM — visit time not used alone to select CPT
                 </span>
               ) : null}
             </div>
@@ -437,6 +521,7 @@ function CptIcdTwoColumn({ billingDecision, addonCodes, justification, lightDefe
             <ul className="m-0 space-y-2 p-0">
               {addonCodes.map((addon) => {
                 const addOnOnly = addon.code.replace(/^\+/, "");
+                const hint = addonPairingHint(addon.code, primary.code);
                 return (
                   <li
                     key={addon.code}
@@ -446,9 +531,9 @@ function CptIcdTwoColumn({ billingDecision, addonCodes, justification, lightDefe
                       <span className="rounded-md bg-[#CCFBF1] px-2 py-0.5 font-mono text-[12px] font-bold text-[#0D6A6B] ring-1 ring-[#99F6E4]">
                         {addOnOnly}
                       </span>
-                      <span className="text-[12px] font-medium text-[#6B7280]">with E/M</span>
-                      <span className="font-mono text-[12px] font-semibold text-[#374151]">{primary.code}</span>
+                      <span className="text-[12px] font-medium text-[#6B7280]">{hint.title}</span>
                     </div>
+                    <p className="mt-1 text-[11px] leading-snug text-[#6B7280]">{hint.subtitle}</p>
                     <p className="mt-1.5 text-[12px] font-medium text-[#374151]">{addon.label}</p>
                     <p className="mt-0.5 text-[11px] leading-snug text-[#6B7280]">{addon.rationale}</p>
                   </li>
@@ -532,6 +617,8 @@ function StructuredResultComponent({ result }) {
     smartWarning,
     icd10,
     addonCodes,
+    cptEligibility,
+    psychotherapyTimeSeparabilityWarning,
     inputSummary,
   } = result;
 
@@ -582,9 +669,27 @@ function StructuredResultComponent({ result }) {
         </div>
       ) : null}
 
+      {psychotherapyTimeSeparabilityWarning ? (
+        <div className="rounded-lg border border-sky-200 bg-sky-50 p-3" role="status">
+          <div className="mb-1 flex items-center gap-2">
+            <svg className="h-4 w-4 shrink-0 text-sky-700" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <p className="text-[12px] font-semibold uppercase tracking-wider text-sky-900">Psychotherapy add-on</p>
+          </div>
+          <p className="text-[14px] font-medium leading-snug text-sky-950">{psychotherapyTimeSeparabilityWarning}</p>
+        </div>
+      ) : null}
+
       <RiskSummaryPanel billingDecision={billingDecision} riskScore={riskScore} />
 
       <CodeRecommendationGrid codeRecommendation={codeRecommendation} />
+
+      <CptEligibilityPanel cptEligibility={cptEligibility} />
 
       {downcodeRiskLine ? (
         <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-[#FFFBEB] px-2.5 py-2 text-[12px] leading-snug text-amber-950">
