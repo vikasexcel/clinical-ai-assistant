@@ -1,0 +1,33 @@
+Established Patient — High Acuity, Multiple 99215 Escalation Triggers
+
+Chief Complaint: Urgent follow-up — patient called crisis line last night.
+
+HPI: 31-year-old female, established patient. Called crisis line last night with passive suicidal ideation, "I don't want to be here anymore." No active plan or means. History of 2 prior psychiatric hospitalizations (2019, 2021). Multiple medication failures: sertraline (inadequate response), venlafaxine (intolerable side effects), bupropion (worsening anxiety). Currently on Lexapro 20mg (initiated 8 weeks ago) with only partial response.
+
+Functional Status: Unable to maintain employment for the past 3 months. Living with family due to inability to manage independently. Unable to perform basic daily activities independently on bad days.
+
+Mental Status Exam:
+Orientation: X3
+Appearance: Disheveled
+Mood: "Hopeless"
+Affect: Constricted, tearful
+Thought Process: Linear but ruminative
+Thought Content: Passive SI, no active plan, no intent. No HI.
+Insight: Fair
+Judgment: Impaired
+
+Risk Stratification: Moderate risk — passive SI, prior hospitalizations, treatment-resistant pattern, significant functional impairment, recent crisis call. Safety plan reviewed and updated. Family contacted (mother, present at visit). Emergency contacts verified.
+
+MDM Complexity: High — multiple treatment failures, active safety concern, need to coordinate with family, consider augmentation vs medication switch.
+
+Assessment:
+F33.1 MDD, recurrent, moderate
+F41.1 GAD
+
+Plan:
+50 minutes of this visit was direct psychotherapy (grief processing, safety planning, CBT). E/M portion was 30 minutes (medication review, risk stratification, MDM, family coordination).
+Family coordination: mother provided collateral history (patient unable to provide reliable history of past medication trials). Discussed inpatient evaluation with family — declined by patient, safety plan robust.
+Consider augmentation with lithium or aripiprazole at next visit if no improvement.
+Follow-up in 1 week.
+
+Risks and benefits of treatment options discussed. Patient and mother agreed to outpatient safety plan.

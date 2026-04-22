@@ -1,0 +1,21 @@
+New Patient Psychiatric Intake — Initial Diagnostic Evaluation
+
+Chief Complaint: Referred by PCP for evaluation of worsening depression and anxiety.
+
+HPI: 34-year-old female presenting for initial psychiatric evaluation. Reports 6 months of persistent low mood, anhedonia, sleep disturbance, and difficulty concentrating. No prior psychiatric treatment. Denies any substance use.
+
+Mental Status Exam:
+Orientation: X3
+Appearance: Well-groomed, appropriate
+Mood: "Sad"
+Affect: Congruent, restricted range
+Thought Process: Linear and goal-directed
+Thought Content: No suicidal ideation, no homicidal ideation, no psychosis
+Insight/Judgment: Good
+
+Assessment:
+F32.1 Major Depressive Disorder, moderate
+F41.1 Generalized Anxiety Disorder
+
+Plan:
+This visit was a comprehensive diagnostic evaluation only. No medications prescribed at this time. Patient was provided with psychoeducation about depression and anxiety. Will follow up in 2 weeks to discuss treatment options. Referral to outpatient therapy provided.

@@ -1,0 +1,21 @@
+New Patient Psychiatric Intake — Initial Evaluation with Medication Initiation
+
+Chief Complaint: First psychiatric visit. Referred for evaluation and medication management of ADHD.
+
+HPI: 28-year-old male presenting for initial psychiatric evaluation. Reports lifelong inattention, impulsivity, difficulty completing tasks at work. Previous neuropsychological testing confirmed ADHD, Combined Presentation. No prior psychiatric medications.
+
+Mental Status Exam:
+Orientation: X3
+Appearance: Casually dressed, fidgeting in chair
+Speech: Normal rate, tangential at times
+Mood: "Fine"
+Affect: Full range, appropriate
+Thought Process: Slightly tangential
+Thought Content: No SI/HI
+Insight/Judgment: Good/Fair
+
+Assessment:
+F90.2 ADHD, Combined Presentation
+
+Plan:
+After comprehensive evaluation and diagnostic interview, decision made to initiate medication. Starting Adderall XR 10mg daily for ADHD symptoms. Risks, benefits, and options discussed including risk of dependency, cardiovascular monitoring, and sleep effects. Patient agreed to trial. No alternatives to stimulant medication indicated given severity of functional impairment and prior behavioral interventions that were tried but unsuccessful. Follow-up in 4 weeks.

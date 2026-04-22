@@ -1,0 +1,23 @@
+Established Patient — E/M with Psychotherapy, Time Explicitly Split
+
+Chief Complaint: Follow-up for depression and anxiety management.
+
+HPI: 38-year-old established female patient. Reports improvement in mood since starting Lexapro 10mg 6 weeks ago but ongoing anxiety. Continues CBT with separate therapist. Today's visit includes medication management and in-session supportive psychotherapy.
+
+Mental Status Exam:
+Orientation: X3
+Mood: "Better than last month"
+Affect: Brighter, appropriate
+Thought Process: Linear
+Thought Content: No SI/HI
+
+Assessment: F32.0 MDD, mild, improving. F41.1 GAD.
+
+Medication: Continue Lexapro 10mg daily. Considering dose increase to 20mg next visit if inadequate response. No controlled substances.
+
+Plan:
+E/M time: 25 minutes (medication review, side effect assessment, MDM, clinical decision-making regarding dose adjustment)
+Psychotherapy time: 35 minutes (supportive therapy, CBT techniques for anxiety, cognitive restructuring)
+Total visit time: 60 minutes
+
+Time documentation: E/M and psychotherapy time documented separately as required.

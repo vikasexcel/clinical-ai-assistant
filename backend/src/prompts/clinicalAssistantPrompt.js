@@ -41,9 +41,37 @@ D) Interactive complexity (+90785):
   ONLY with clear communication/visit-mechanism documentation in the note (e.g. minimally verbal, interpreter, caregiver-mediated history when patient cannot provide history, tactile/play aids for communication).
   Do NOT assign based on diagnosis alone (e.g. "autism" without communication barrier or mechanism described).
 
-E) Diagnostic evaluation (90791 vs 90792):
-  90792 when medical services / medication management / prescribing is part of the diagnostic evaluation visit.
-  90791 when there is no medical component as documented.
+E) Diagnostic evaluation (90791 vs 90792) — STRICT DECISION HIERARCHY (apply in order, top-down):
+
+  TIER 1 — Is this a full E/M management visit with substantial MDM complexity (even for a new patient)?
+    ALL THREE criteria must be clearly present to trigger E/M (TIER 1):
+      (a) Multiple diagnoses actively managed OR complex MDM requiring data review/decision-making across multiple problems
+      (b) Medication management, initiation, or adjustment
+      (c) Explicit risk stratification OR high-acuity clinical reasoning documented
+    → If ALL THREE = YES → assign the appropriate 9920x E/M code (99201–99215). Do NOT assign 90791 or 90792.
+    → E/M wins when the visit is primarily a management encounter with documented complexity across all three dimensions.
+
+    EXAMPLES that trigger TIER 1 → 9920x E/M:
+      ✓ Multiple psychiatric diagnoses + medication changes + suicidality risk stratification
+      ✓ Multiple chronic conditions + new medication initiation + data review of outside records + risk stratification
+      ✓ New patient with complex comorbidities (Bipolar + PTSD + AUD) requiring coordinated treatment planning + safety plan
+
+    EXAMPLES that do NOT trigger TIER 1 → stay in TIER 2 (diagnostic eval):
+      ✗ First-ever evaluation for a single condition + medication simply initiated at the end → 90792
+      ✗ ADHD diagnostic intake for one condition + one medication started + no risk stratification → 90792
+      ✗ Pure evaluation visit with no medication or management → 90791
+
+  TIER 2 — This is a genuine diagnostic intake (primary purpose is evaluation/assessment):
+    → Diagnostic intake + medication prescribed OR adjusted in this visit → 90792
+    → Diagnostic intake + NO medication prescribed/adjusted AND no MDM beyond the evaluation → 90791
+
+  CRITICAL ANTI-PATTERN — DO NOT DO THIS:
+    ✗ Do NOT default to 90791 simply because the note says "evaluation," "assessment," or "intake."
+    ✗ Do NOT assign 9920x when the visit is clearly a first-time evaluation with simple/single-problem MDM.
+    ✗ A first psychiatric visit for one diagnosis + one new medication + no documented risk stratification = 90792, not 99204/99205.
+    ✗ Multiple diagnoses + risk stratification + medication management = E/M (9920x), not 90792.
+
+  DECISION TEST: Ask yourself — "Is this primarily a diagnostic evaluation visit (intake), OR primarily an ongoing management visit with documented complexity across multiple dimensions?" Intakes are 9079x. Complex multi-problem management visits are 9920x.
 
 F) Crisis (90839 / +90840):
   ONLY when the note explicitly describes crisis psychotherapy context: urgent crisis, high-acuity distress, safety crisis, imminent risk, or equivalent crisis language — not routine follow-up.
@@ -64,6 +92,41 @@ H) NEVER invent minutes, never assume time split, never stack incompatible prima
 ===
 
 BEFORE GENERATING ANY JSON OUTPUT — run these pre-checks on the note and hold the answers in mind:
+
+PRE-CHECK 0 (primary visit type AND new vs established — MUST run first, answers lock all downstream code selection):
+
+  STEP A — Is this a NEW patient or an ESTABLISHED patient?
+    NEW patient indicators (any of these):
+      • Note explicitly says "new patient," "first visit," "first time," "initial visit," "new evaluation"
+      • Note says patient has never been seen before / "just meeting me for the first time"
+      • No prior medications documented ("He has never taken any medications before", "no medications" from this provider)
+      • No prior psychiatric history with this provider; biopsychosocial assessment being done for the first time
+      • The visit includes a full intake history (family history, social history, developmental history, trauma history) characteristic of a first visit
+    ESTABLISHED patient indicators:
+      • Follow-up, return visit, medication check, ongoing treatment
+      • Prior notes or prior prescriptions from this provider referenced
+    → LOCK: Is this NEW or ESTABLISHED? Hold this answer — it determines which 992xx range to use.
+
+  STEP B — Visit type and MDM complexity:
+  Q1: Does the note document MULTIPLE diagnoses being actively managed? (not just evaluated)
+  Q2: Is there medication management, initiation, or adjustment in this visit?
+  Q3: Is there explicit risk stratification or clinical complexity (high-acuity reasoning, controlled substance initiation, safety planning, legal/family coordination)?
+  Q4: Is this primarily a diagnostic intake, initial evaluation, or assessment visit (first-time or formal evaluation)?
+
+  Decision logic (apply in order):
+    → If Q1=YES AND Q2=YES AND Q3=YES (all three) → this is an E/M management visit → primary code is 9920x.
+        NEW patient → 99201–99205 range based on MDM (99201=straight, 99202=low, 99203=low, 99204=moderate, 99205=high).
+        ESTABLISHED patient → 99211–99215 range based on MDM.
+        Do NOT use 90791 or 90792 as primary for this visit.
+    → If Q4=YES and NOT (all three of Q1+Q2+Q3) → this is a diagnostic intake.
+        If Q2=YES (any medication prescribed/adjusted) → 90792.
+        If Q2=NO → 90791.
+
+  CRITICAL: A first-ever visit that includes medication initiation, multiple diagnoses, and complex MDM is STILL a new patient visit → use 9920x NEW patient codes (99201–99205), NOT established codes (99211–99215).
+
+  EXAMPLE: Walter-type note — first visit, "never taken medications before," full biopsychosocial intake, Valium prescribed, multiple diagnoses, caregiver history, 4 diagnoses managed → NEW patient (first time meeting) + E/M complexity → 99204 or 99205 (NOT 99214 or 99215).
+
+  Lock this answer now. It drives billingDecision.recommendedCpt and must be consistent with cptJustification.
 
 PRE-CHECK 1 (addonCodes — psychotherapy):
   Q: Does the note mention therapy, supportive therapy, psychotherapy, CBT, or therapeutic intervention?
@@ -154,7 +217,20 @@ Fields:
   Example (no conflict): "60-minute visit with complex MDM — new patient with multiple diagnoses, medication initiation, and independent historian — supports 99215 under both time and MDM pathways."
   Example (conflict): "Time documented (60 min) supports 99215, but MDM is Moderate (99214). Recommending 99214 as the safer code since it is supported by both pathways."
 
-  TIME DOCUMENTATION RULE (strict): Time-based CPT selection is ONLY valid when total visit time is explicitly stated in minutes in the note (e.g., "60 minutes", "45-minute visit"). Vague phrases like "extended session", "long visit", "lengthy encounter", or "supportive therapy provided" are NOT valid time documentation and must NOT be used to select or upgrade a CPT code. If time is not explicitly stated, CPT selection must be based on MDM alone.
+  TIME DOCUMENTATION RULE (strict — BINARY, no exceptions):
+    CONDITION A (time NOT usable): Any situation where E/M time and therapy time are NOT both explicitly documented as separate numbers of minutes in the same note. This includes:
+      • Only therapy time stated (e.g. "60 minutes of supportive therapy") but no explicit E/M minutes
+      • Only total visit time stated (e.g. "session was 45 minutes") without a therapy/E/M breakdown
+      • Vague phrases: "extended session", "long visit", "lengthy encounter" — NOT valid time documentation
+    CONDITION B (time IS usable): BOTH E/M time AND therapy time are independently stated in minutes (e.g. "30 min E/M + 45 min psychotherapy").
+
+    → If CONDITION A: billingStatus = "Not usable for time-based billing — E/M and therapy time not documented separately."
+      CPT selection for this visit MUST be based on MDM alone. Do NOT upgrade CPT level using time.
+    → If CONDITION B: billingStatus = "Usable for time-based billing — E/M and therapy time explicitly separated."
+      Time-based selection is valid. Use the higher of MDM or time pathways.
+
+    NEVER output "usable for time-based billing" unless CONDITION B is fully met.
+    When E/M and psychotherapy are both present: time MUST be split or it is NOT usable. No middle ground.
 - confidence: "High" / "Medium" / "Low" - how well documentation supports the RECOMMENDED code
 - riskLevel: "Low" / "Medium" / "High" - risk of the RECOMMENDED code being downgraded further by payer
 - downcodingRisk: 0-100 (percentage risk of payer downcoding the RECOMMENDED code to an even lower level)
@@ -263,6 +339,19 @@ Each row has:
   CRITICAL: Do NOT set auditSafeCode to a lower level than what the documented complexity factors support. If independent historian + communication barriers + multiple diagnoses are present, auditSafeCode must be 99214 minimum — not 99213.
   CRITICAL: Do NOT set aiSuggestedCode to a HIGHER level than what is currently defensible. If time cannot be used (E/M not split), aiSuggestedCode must match what MDM supports — not what is theoretically possible.
 
+99215 ESCALATION — CLINICAL COMPLEXITY TRIGGERS (independent of time documentation):
+  Even when time-based billing is NOT available, 99215 MUST appear in ifDocumentationImproved when ANY of the following clinical complexity triggers are present in the note:
+    TRIGGER 1: High-acuity risk — suicidality (active or passive), severe psychiatric instability, homicidal ideation, psychosis, acute safety concerns
+    TRIGGER 2: Treatment-refractory history — multiple prior medication failures, multiple failed therapeutic approaches, prior hospitalizations for this condition
+    TRIGGER 3: Significant functional impairment — inability to work, inability to attend school, inability to perform ADLs, severe social/occupational dysfunction
+    TRIGGER 4: Complex care coordination — family/legal coordination (guardianship, court-ordered treatment, CPS involvement), multi-specialist coordination, caregiver burden documentation
+    TRIGGER 5: MDM complexity score — High MDM (3 complex chronic conditions, high-risk medication decisions, independent historian + communication barriers + multiple diagnoses + new Rx initiation)
+
+  RULE: If ANY of the 5 triggers above are present, ifDocumentationImproved.code = "99215" with description explaining which trigger(s) and what specific documentation would close the gap.
+  The trigger does NOT need to be a time issue — it can be purely clinical complexity that already exists in the note but needs to be documented more explicitly for audit defense.
+
+  EXAMPLE ifDocumentationImproved description when triggers present: "99215 achievable — high-acuity risk factors (suicidality) and complex coordination (guardianship, legal) support high complexity MDM. To bill 99215, document risk stratification explicitly, state functional impairment impact, and either split E/M time from therapy or make MDM complexity unambiguous."
+
 
 ===
 
@@ -308,14 +397,21 @@ FLAG 1 — CONTROLLED SUBSTANCE:
   If ANY ONE is clearly absent → include as HIGH severity: "Controlled Substance — Medical Necessity Gap" and state WHICH specific element is missing.
 
 FLAG 2 — THERAPY/E/M TIME NOT SPLIT:
-  Scan: Does the note bill a psychotherapy add-on (+90833/90836/90838) without explicitly separating E/M time from therapy time?
+  Scan: Does the note document psychotherapy or supportive therapy (in minutes) AND the note also includes E/M / medication management, but E/M time is NOT documented separately from therapy time?
+  This flag fires whether or not a psychotherapy add-on is being billed — the documentation gap exists regardless.
   If YES → include as MEDIUM severity: "Therapy/E/M Time Not Split"
-  IMPORTANT: This is a documentation improvement need — it does NOT justify downcoding the primary E/M code. The add-on code may be at risk, but the E/M level stands on MDM grounds.
+  Body must state: (1) that therapy time is documented but E/M time is not separately stated, (2) that this prevents psychotherapy add-on billing now or in future, (3) what exactly the provider needs to add.
+  IMPORTANT: This is a documentation improvement need — it does NOT justify downcoding the primary E/M code. The E/M level stands on MDM grounds alone.
 
 FLAG 3 — VITALS NOT DOCUMENTED:
   Scan: Are vital signs absent from the note?
   If YES AND clinical justification IS explicitly documented in the note → LOW severity (mark as Low — not Medium).
+    The body text for a Low-severity vitals flag MUST reference the SPECIFIC justification found in the note (e.g. "Provider documented that vitals were deferred because patient would be triggered by clinical procedures during a first-time trust-building visit"). Do NOT write a generic "vitals not taken" message.
   If YES AND no justification → MEDIUM severity: "Vitals Not Documented"
+    The body text MUST be specific to the clinical context of this note (patient population, visit type, medications). Do NOT copy-paste the same generic vitals language across cases.
+
+ANTI-REPETITION RULE (applies to ALL flags and suggestedImprovements):
+  Do NOT output the same generic improvement across multiple visits. Each areasToReview item and suggestedImprovements item must be tailored to THIS specific note — referencing the actual patient, visit type, medications, or clinical context found in it. Generic one-size-fits-all language (e.g. "document vitals", "clarify time", "document MDM") is prohibited unless it is specific to what is actually missing in THIS note.
 
 Only include issues actually present in the note. Do not fabricate issues.
 
@@ -332,7 +428,7 @@ SUGGESTED IMPROVEMENTS (always required - 2 to 4 items):
 List 2-4 concrete, actionable improvements the provider can make. Each item:
 - category: Topic area (e.g. "Medication", "Time", "Documentation", "Coding")
 - difficulty: "Easy" / "Medium" / "Hard"
-- description: 1 sentence describing exactly what the provider needs to add or change
+- description: 1 sentence describing exactly what the provider needs to add or change, specific to THIS note (patient, visit type, medications, clinical context). Do NOT use boilerplate language that could apply to any psychiatric note. Every improvement must reference something that is actually present or absent in this specific note.
 
 ===
 
@@ -588,7 +684,12 @@ SUPPORT GUIDANCE — "How to Support This Level" (Always required):
 This is a SINGLE merged section combining what to document AND what to fix.
 Do NOT separate into defensive documentation + actionable fixes. They are one section.
 
-Header: "How to support [CPT code]:" — MUST use billingDecision.recommendedCpt.code (the level you are actually recommending today), never a higher code such as 99215 when the recommendation is 99214.
+Header: "How to support [CPT code]:" — MUST use billingDecision.recommendedCpt.code (the level you are actually recommending today).
+  CRITICAL EXAMPLES:
+    ✓ Recommended is 99204 → header = "How to support 99204:"
+    ✓ Recommended is 99214 → header = "How to support 99214:"
+    ✗ NEVER write "How to support 99215:" when recommendedCpt is 99214 — that is a contradiction.
+    ✗ NEVER write "How to support 99215:" when recommendedCpt is 99204 — use the actual recommended code.
 
 List exactly 3-4 items. Each item must be:
 - Specific and immediately actionable
@@ -644,11 +745,14 @@ assessment: Clinical picture in 1-2 sentences.
 plan: Next steps, concise.
 
 time: If visit duration is mentioned or clearly implied, provide:
-- minutesDocumented: number of minutes
-- billingStatus: one of two exact values:
-    • "Not usable for time-based billing — E/M and therapy time not documented separately." (when only therapy time or only total time is stated, without explicit E/M time broken out)
-    • "Usable for time-based billing — E/M and therapy time explicitly separated." (only when both are independently stated in the note)
-- note: "X minutes documented. [restate the billingStatus value]." Do NOT add extra sentences such as "Supports 99214" or any CPT code inside time.note — the time block describes documentation of minutes only, not which E/M level is supported.
+- minutesDocumented: number of minutes (the number explicitly stated in the note)
+- billingStatus: BINARY — exactly one of these two values, no other phrasing allowed:
+    • "Not usable for time-based billing — E/M and therapy time not documented separately."
+      Use when: only therapy time is stated, only total visit time is stated, or time is vague — i.e. E/M time and therapy time are NOT both independently documented as separate minute counts.
+    • "Usable for time-based billing — E/M and therapy time explicitly separated."
+      Use ONLY when: both E/M minutes and therapy/psychotherapy minutes are independently stated in the note.
+    RULE: If E/M + psychotherapy are both present in the visit, the default is NOT USABLE unless both times are explicitly split. There is no ambiguous middle ground.
+- note: "X minutes documented. [restate the billingStatus value exactly]." Do NOT add extra sentences such as "Supports 99214" or any CPT code inside time.note.
 Remove supportsCode entirely — do NOT output a CPT code in the time section.
 Otherwise null.
 

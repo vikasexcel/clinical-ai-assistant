@@ -1,0 +1,31 @@
+New Patient — Complex E/M Visit (should trigger 99205, NOT 90791/90792)
+
+Chief Complaint: New patient visit. Multiple psychiatric conditions requiring evaluation and medication management.
+
+HPI: 42-year-old male, new patient, presenting for comprehensive psychiatric evaluation. History of bipolar I disorder (multiple prior hospitalizations), PTSD (combat veteran), and alcohol use disorder in early remission (2 months sober). Currently on no psychiatric medications — stopped all medications 3 months ago without medical guidance.
+
+Review of Systems: Mood instability, insomnia, nightmares, hypervigilance, alcohol cravings, decreased appetite, fatigue.
+
+Mental Status Exam:
+Orientation: X3
+Appearance: Disheveled, malodorous
+Speech: Pressured
+Mood: "Wired but also depressed"
+Affect: Labile, irritable
+Thought Process: Circumstantial
+Thought Content: Passive SI (no plan/intent), grandiose ideation, no HI, no AVH
+Insight: Limited
+Judgment: Impaired
+
+Assessment and MDM:
+Multiple complex chronic conditions: Bipolar I, PTSD, AUD in remission. Passive suicidal ideation present — low acuity but documented. High-risk medication decision: restarting mood stabilizer in context of alcohol use disorder. Reviewed labs (CBC, CMP, lithium level from outside records). Coordinated care plan with VA psychiatry and primary care.
+
+Diagnoses:
+F31.10 Bipolar I disorder, current episode manic, unspecified
+F43.10 Post-traumatic stress disorder
+F10.10 Alcohol use disorder, mild, in early remission
+
+Plan:
+Restarting Lithium carbonate 300mg TID with lithium level to be drawn in 1 week. Risks, benefits, and alternatives (Lamotrigine, Valproate) discussed. Patient agreed to lithium trial given prior response history. Safety plan discussed and documented. Referred to PTSD-focused therapy (CPT). Follow up in 1 week due to clinical complexity and passive SI.
+
+Risks and benefits of all medications discussed in detail. Patient verbalized understanding and agreed to treatment plan.
